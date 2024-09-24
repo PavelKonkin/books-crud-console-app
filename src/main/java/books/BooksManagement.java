@@ -2,11 +2,15 @@ package books;
 
 import books.app.BookManagementApp;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.io.IOException;
+import java.util.Locale;
 
 @Configuration
 @ComponentScan(basePackages = "books")
@@ -15,5 +19,14 @@ public class BooksManagement {
         ApplicationContext context = new AnnotationConfigApplicationContext(BooksManagement.class);
         BookManagementApp app = context.getBean(BookManagementApp.class);
         app.run();
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setDefaultLocale(Locale.ENGLISH);
+        return messageSource;
     }
 }

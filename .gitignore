@@ -33,3 +33,12 @@ build/
 *.iml
 *.iws
 out/
+.idea
+*.ipr
+
+### Mac OS ###
+.DS_Store
+
+# storage files #
+*.csv
+*.txt

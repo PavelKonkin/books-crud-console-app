@@ -22,6 +22,7 @@ public class BookManagementAppImpl implements BookManagementApp {
 
     @Override
     public void run() throws IOException {
+        ioService.setLocale();
         while (true) {
             String userChoice = ioService.getMainMenuChoice();
             if (!processChoice(userChoice)) {
@@ -46,19 +47,24 @@ public class BookManagementAppImpl implements BookManagementApp {
                         bookDto = ioService.getBookUpdateData(bookDto);
                         bookService.update(bookDto);
                     } else {
-                        ioService.showMessage("Книги с таким id не существует");
+                        ioService.showIvalidIdMessage();
                     }
                 }
                 break;
             case "3":
                 bookId = ioService.getBookId();
-                bookService.delete(bookId);
+                if (bookService.get(bookId) != null) {
+                    bookService.delete(bookId);
+                } else {
+                    ioService.showIvalidIdMessage();
+                }
                 break;
             case "4":
                 List<BookDto> books = bookService.getAllBooks();
                 ioService.printBooksList(books);
                 break;
             case "выход":
+            case "exit":
                 return false;
         }
         return true;
