@@ -5,6 +5,7 @@ import books.model.Book;
 import books.model.Genre;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -17,6 +18,7 @@ public class BookStorageDbImpl implements BookStorage {
     }
 
     @Override
+    @Transactional
     public void add(Book book) {
         String sql = "INSERT INTO books (title, description) VALUES (?, ?) RETURNING book_id";
         Integer bookId = jdbcTemplate.queryForObject(sql, Integer.class, book.getTitle(), book.getDescription());
@@ -95,6 +97,7 @@ public class BookStorageDbImpl implements BookStorage {
     }
 
     @Override
+    @Transactional
     public void update(Book updatedBook) {
         String sql = "UPDATE books SET title = ?, description = ? WHERE book_id = ?";
         jdbcTemplate.update(sql, updatedBook.getTitle(), updatedBook.getDescription(), updatedBook.getId());
