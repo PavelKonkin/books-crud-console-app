@@ -1,17 +1,18 @@
 package books.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonPropertyOrder({"id", "title", "author", "description"})
 public class Book {
     private Integer id;
     private String title;
-    private String author;
+    private List<Author> authors;
+    private List<Genre> genres;
     private String description;
 }

@@ -1,10 +1,13 @@
 package books.io;
 
+import books.model.dto.AuthorDto;
 import books.model.dto.BookDto;
+import books.model.dto.GenreDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -47,11 +50,8 @@ public class IOServiceImpl implements IOService {
                         null, currentLocale),
                 messageSource.getMessage("bookCreationTitleMessage",
                         null, currentLocale));
-        String author = getUserInput(STRING_REGEX_FILTER,
-                messageSource.getMessage("stringIncorrectMessage",
-                        null, currentLocale),
-                messageSource.getMessage("bookCreationAuthorMessage",
-                        null, currentLocale));
+        List<AuthorDto> authors = getAuthorsList();
+        List<GenreDto> genres = getGenresList();
         String description = getUserInput(STRING_REGEX_FILTER,
                 messageSource.getMessage("stringIncorrectMessage",
                         null, currentLocale),
@@ -60,9 +60,86 @@ public class IOServiceImpl implements IOService {
 
         return BookDto.builder()
                 .title(title)
-                .author(author)
+                .authors(authors)
+                .genres(genres)
                 .description(description)
                 .build();
+    }
+
+    private List<AuthorDto> getAuthorsList() {
+        List<AuthorDto> authors = new ArrayList<>();
+        while (true) {
+            printAuthorsInputMenu();
+
+            String userInput = getUserInput(TWO_OPTIONS_MENU_REGEX_FILTER,
+                    messageSource.getMessage("twoOptionsMenuIncorrectInputMessage",
+                            null, currentLocale), "");
+
+            if (userInput.equals("1")) {
+                String authorName = getUserInput(STRING_REGEX_FILTER,
+                        messageSource.getMessage("stringIncorrectMessage",
+                                null, currentLocale),
+                        messageSource.getMessage("enterAuthorName",
+                                null, currentLocale));
+                AuthorDto authorDto = AuthorDto.builder()
+                        .name(authorName)
+                        .build();
+                authors.add(authorDto);
+            } else if (userInput.equals("2") && !authors.isEmpty()) {
+                break;
+            } else {
+                System.out.println(messageSource.getMessage("authorsEmptyAlert",
+                        null, currentLocale));
+            }
+        }
+        return authors;
+    }
+
+    private void printAuthorsInputMenu() {
+        System.out.println(messageSource.getMessage("authorsMenuTitle",
+                null, currentLocale));
+        System.out.println(messageSource.getMessage("authorsMenuAddAuthorText",
+                null, currentLocale));
+        System.out.println(messageSource.getMessage("menuContinueText",
+                null, currentLocale));
+    }
+
+    private List<GenreDto> getGenresList() {
+        List<GenreDto> genres = new ArrayList<>();
+        while (true) {
+            printGenresInputMenu();
+
+            String userInput = getUserInput(TWO_OPTIONS_MENU_REGEX_FILTER,
+                    messageSource.getMessage("twoOptionsMenuIncorrectInputMessage",
+                            null, currentLocale), "");
+
+            if (userInput.equals("1")) {
+                String genreTitle = getUserInput(STRING_REGEX_FILTER,
+                        messageSource.getMessage("stringIncorrectMessage",
+                                null, currentLocale),
+                        messageSource.getMessage("enterGenreName",
+                                null, currentLocale));
+                GenreDto genreDto = GenreDto.builder()
+                        .title(genreTitle)
+                        .build();
+                genres.add(genreDto);
+            } else if (userInput.equals("2") && !genres.isEmpty()) {
+                break;
+            } else {
+                System.out.println(messageSource.getMessage("genresEmptyAlert",
+                        null, currentLocale));
+            }
+        }
+        return genres;
+    }
+
+    private void printGenresInputMenu() {
+        System.out.println(messageSource.getMessage("genresMenuTitle",
+                null, currentLocale));
+        System.out.println(messageSource.getMessage("genresMenuAddGenreText",
+                null, currentLocale));
+        System.out.println(messageSource.getMessage("menuContinueText",
+                null, currentLocale));
     }
 
     @Override
@@ -75,7 +152,7 @@ public class IOServiceImpl implements IOService {
         System.out.println(messageSource.getMessage("getBookByIdMenuGoBackText",
                 null, currentLocale));
         String input = getUserInput(TWO_OPTIONS_MENU_REGEX_FILTER,
-                messageSource.getMessage("getBookByIdMenuIncorrectInputMessage",
+                messageSource.getMessage("twoOptionsMenuIncorrectInputMessage",
                         null, currentLocale),
                 "");
         if (input.equals("1")) {
@@ -100,12 +177,14 @@ public class IOServiceImpl implements IOService {
                         null, currentLocale));
         System.out.print(messageSource.getMessage("bookUpdateCurrentAuthorMessage",
                 null, currentLocale));
-        System.out.println(bookDto.getAuthor());
-        String author = getUserInput(STRING_REGEX_FILTER,
-                messageSource.getMessage("stringIncorrectMessage",
-                        null, currentLocale),
-                messageSource.getMessage("bookUpdateEnterNewAuthorMessage",
-                        null, currentLocale));
+        System.out.println(bookDto.getAuthors());
+        List<AuthorDto> authors = getAuthorsList();
+
+        System.out.print(messageSource.getMessage("bookUpdateCurrentGenresMessage",
+                null, currentLocale));
+        System.out.println(bookDto.getGenres());
+        List<GenreDto> genres = getGenresList();
+
         System.out.print(messageSource.getMessage("bookUpdateCurrentDescriptionMessage",
                 null, currentLocale));
         System.out.println(bookDto.getDescription());
@@ -118,7 +197,8 @@ public class IOServiceImpl implements IOService {
         return BookDto.builder()
                 .id(bookDto.getId())
                 .title(title)
-                .author(author)
+                .authors(authors)
+                .genres(genres)
                 .description(description)
                 .build();
     }
@@ -141,7 +221,10 @@ public class IOServiceImpl implements IOService {
             System.out.println(book.getTitle());
             System.out.print(messageSource.getMessage("bookListBookAuthor",
                     null, currentLocale));
-            System.out.println(book.getAuthor());
+            System.out.println(book.getAuthors());
+            System.out.print(messageSource.getMessage("bookListBookGenres",
+                    null, currentLocale));
+            System.out.println(book.getGenres());
             System.out.print(messageSource.getMessage("bookListBookDescription",
                     null, currentLocale));
             System.out.println(book.getDescription());
