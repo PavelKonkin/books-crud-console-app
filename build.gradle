@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework:spring-core:5.3.21'
-    implementation 'org.springframework:spring-context:5.3.21'
+    implementation 'org.springframework:spring-core:6.1.8'//:5.3.21'
+    implementation 'org.springframework:spring-context:6.1.14'//:5.3.21'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.1'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.15.1'
 
@@ -28,6 +28,27 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework/spring-jdbc
     implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.24'
     implementation 'org.postgresql:postgresql:42.2.5'
+
+    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core
+    implementation group: 'org.hibernate.orm', name: 'hibernate-core', version: '6.5.2.Final'
+
+    // https://mvnrepository.com/artifact/org.springframework/spring-orm
+    implementation group: 'org.springframework', name: 'spring-orm', version: '6.1.12' //'5.3.21'
+
+    // https://mvnrepository.com/artifact/org.springframework/spring-tx
+    implementation group: 'org.springframework', name: 'spring-tx', version: '6.1.12' //'5.3.21'
+
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'ch.qos.logback:logback-classic:1.4.12'
+
+    // https://mvnrepository.com/artifact/org.ehcache/ehcache
+    implementation 'org.ehcache:ehcache:3.10.8'
+
+    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-jcache
+    implementation 'org.hibernate.orm:hibernate-jcache:6.6.1.Final'
+    
+    implementation 'javax.cache:cache-api:1.1.1' // JCache API
+
 }
 
 jar {
