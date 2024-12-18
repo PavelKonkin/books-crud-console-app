@@ -47,17 +47,13 @@ public class BookManagementAppImpl implements BookManagementApp {
                         bookDto = ioService.getBookUpdateData(bookDto);
                         bookService.update(bookDto);
                     } else {
-                        ioService.showIvalidIdMessage();
+                        ioService.showInvalidIdMessage();
                     }
                 }
                 break;
             case "3":
                 bookId = ioService.getBookId();
-                if (bookService.get(bookId) != null) {
-                    bookService.delete(bookId);
-                } else {
-                    ioService.showIvalidIdMessage();
-                }
+                bookService.delete(bookId);
                 break;
             case "4":
                 List<BookDto> books = bookService.getAllBooks();

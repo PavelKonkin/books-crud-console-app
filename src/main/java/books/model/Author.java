@@ -2,6 +2,8 @@ package books.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Cache;
 
 @Entity
 @Table(name = "authors")
@@ -10,6 +12,7 @@ import lombok.*;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Author {
     @Id
     @Column(name = "author_id")

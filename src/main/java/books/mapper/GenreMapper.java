@@ -5,11 +5,12 @@ import books.model.dto.GenreDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class GenreMapper {
-    public List<GenreDto> convertGenreList(List<Genre> genres) {
+    public List<GenreDto> convertGenreList(Set<Genre> genres) {
         return genres.stream()
                 .map(this::convertGenreToDto)
                 .collect(Collectors.toList());
@@ -21,10 +22,10 @@ public class GenreMapper {
                 .build();
     }
 
-    public List<Genre> convertGenreDtoList(List<GenreDto> genres) {
+    public Set<Genre> convertGenreDtoList(List<GenreDto> genres) {
         return genres.stream()
                 .map(this::convertGenreDtoToGenre)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public Genre convertGenreDtoToGenre(GenreDto genreDto) {
