@@ -28,6 +28,7 @@ public class BookDto {
     @NotBlank
     @Size(min = 2, max = 1000)
     private String description;
+    private String imageId;
 
     @Override
     public String toString() {
@@ -36,6 +37,7 @@ public class BookDto {
                 ", title='" + title + '\'' +
                 ", authors=" + authors +
                 ", genres=" + genres +
+                ", imageId=" + imageId +
                 ", description='" + description + '\'' +
                 '}';
     }
