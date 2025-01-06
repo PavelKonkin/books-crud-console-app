@@ -50,7 +50,7 @@ public class FileStorageImpl implements FileStorage {
         metadata.put("filename", decodedFilename);
 
         ObjectId fileId = gridFsTemplate.store(
-                file.getInputStream(), file.getOriginalFilename(), file.getContentType(), metadata);
+                file.getInputStream(), decodedFilename, file.getContentType(), metadata);
         return fileId.toString();
     }
 
