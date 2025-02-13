@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: user-service
+  config:
+    import: "configserver:"
+  cloud:
+    circuitbreaker:
+      resilience4j:
+        enabled: true
+    consul:
+      discovery:
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        enabled: true
+        tags: ${CONSUL_SERVER_ROLE:server}
+      host: ${CONSUL_HOST:localhost}
+      port: 8500
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: true
+      password: ${CONFIG_SERVICE_PASSWORD}
+      username: user
+    openfeign:
+      circuitbreaker:
+        enabled: true
+logging:
+  level:
+    root: DEBUG
+    org.springframework.cloud.config: DEBUG

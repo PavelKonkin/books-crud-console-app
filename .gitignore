@@ -42,3 +42,4 @@ out/
 # storage files #
 *.csv
 *.txt
+/env_vars.sh

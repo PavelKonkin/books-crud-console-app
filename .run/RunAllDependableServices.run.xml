@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RunAllDependableServices" type="CompoundRunConfigurationType">
+    <toRun name="BookServiceApplication" type="SpringBootApplicationConfigurationType" />
+    <toRun name="FileServiceApplication" type="SpringBootApplicationConfigurationType" />
+    <toRun name="JwtServiceApplication" type="SpringBootApplicationConfigurationType" />
+    <toRun name="UserServiceApplication" type="SpringBootApplicationConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

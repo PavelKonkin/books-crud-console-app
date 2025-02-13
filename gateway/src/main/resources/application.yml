@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: gateway
+  config:
+    import: "configserver:"
+  cloud:
+    consul:
+      discovery:
+        enabled: true
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        tags: ${CONSUL_SERVER_ROLE:server}
+      host: ${CONSUL_HOST:localhost}
+      port: 8500
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: true
+      password: ${CONFIG_SERVICE_PASSWORD}
+      username: user
+logging:
+  level:
+    root: DEBUG
+    org.springframework.cloud.config: DEBUG
