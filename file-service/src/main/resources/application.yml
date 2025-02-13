@@ -1,0 +1,36 @@
+spring:
+  data:
+    mongodb:
+      authentication-database:
+  application:
+    name: file-service
+  config:
+    import: "configserver:"
+  cloud:
+    consul:
+      discovery:
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        enabled: true
+        tags: ${CONSUL_SERVER_ROLE:server}
+      host: ${CONSUL_HOST:localhost}
+      port: 8500
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: true
+      password: ${CONFIG_SERVICE_PASSWORD}
+      username: user
+    openfeign:
+      circuitbreaker:
+        enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 30000
+logging:
+  level:
+    root: DEBUG
+    org.springframework.cloud.config: DEBUG

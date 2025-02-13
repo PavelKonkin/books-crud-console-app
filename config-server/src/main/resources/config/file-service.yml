@@ -1,0 +1,18 @@
+spring:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  data:
+    mongodb:
+      uri: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${FILES_DB_CONTAINER_NAME:localhost}:27017/${MONGODB_DB_NAME}
+      database: ${MONGODB_DB_NAME}
+      password: ${MONGODB_PASSWORD}
+      username: ${MONGODB_USER}
+      authentication-database: admin
+server:
+  port: 8083

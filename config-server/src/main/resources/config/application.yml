@@ -1,0 +1,47 @@
+logging:
+  level:
+    org.apache.http: warn
+    h.i.c: warn
+    org.springframework.cloud.consul: warn
+jwt:
+  service:
+    secret: ${JWT_SERVICE_SECRET:placeholder}
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 30000
+resilience4j:
+  circuitbreaker:
+    instances:
+      jwtFeignClient:
+        base-config: default
+      booksFeignClient:
+        base-config: default
+      consulFeignClient:
+        base-config: default
+      userFeignClient:
+        base-config: default
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state:
+          seconds: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        slow-call-duration-threshold:
+          seconds: 5
+        slow-call-rate-threshold: 50
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException.NotFound
+          - com.books.exception.NotFoundException
+          - feign.FeignException.NotFound
+server:
+  error:
+    whitelabel:
+      enabled: false

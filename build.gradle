@@ -1,0 +1,49 @@
+plugins {
+    id 'checkstyle'
+}
+
+group = 'books'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+checkstyle {
+    toolVersion = '10.3'  // Версия Checkstyle
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+
+task startContainersForDebugAndDevelopment(type: Exec) {
+    group = 'application'
+    workingDir '.' // Путь к файлу docker-compose.yml
+    commandLine 'docker', 'compose', 'up', '-d', 'consul', 'user-db', 'book-db', 'file-db'
+}
+
+task stopContainers(type: Exec) {
+    group = 'application'
+    workingDir '.'  // Путь к файлу docker-compose.yml
+    commandLine 'docker', 'compose', 'down'
+}
+
+task restartContainersForDebugAndDevelopment(dependsOn: ['stopContainers',
+                                           'startContainersForDebugAndDevelopment']) {
+    group = 'application'
+    doLast {
+        println 'Selected containers have been restarted!'
+    }
+}
+
+task startProdContainers(type: Exec) {
+    group = 'application'
+    workingDir '.' // Путь к файлу docker-compose.yml
+    commandLine 'docker', 'compose', 'up', '-d'
+}
+
+task restartProdContainers(dependsOn: ['stopContainers',
+                                                         'startProdContainers']) {
+    group = 'application'
+    doLast {
+        println 'Prod containers have been restarted!'
+    }
+}

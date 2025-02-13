@@ -1,0 +1,22 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: book-service
+          uri: lb://BOOK-SERVICE
+          predicates:
+            - Path=/api/v1/books/**
+#          filters:
+#            - name: "AuthenticationFilter"  # Кастомный фильтр для проверки токена
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+        - id: file-service
+          uri: lb://FILE-SERVICE
+          predicates:
+            - Path=/api/v1/files/**
+#          filters:
+#            - name: "AuthenticationFilter"
+server:
+  port: 8080  # Порт Gateway
