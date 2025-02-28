@@ -1,0 +1,16 @@
+services:
+  kafka:
+    environment:
+      # Добавляем EXTERNAL listener только для dev окружения
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+    ports:
+      - "9092:9092"
+  user-db:
+    ports:
+      - "6543:5432"
+  book-db:
+    ports:
+      - "6542:5432"
+  file-db:
+    ports:
+      - "27017:27017"

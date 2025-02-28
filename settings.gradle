@@ -1,0 +1,12 @@
+rootProject.name = 'books-management-app'
+include 'config-server'
+include 'gateway'
+include 'jwt-service'
+include 'common-messages'
+include 'user-service'
+include 'book-service'
+include 'file-service'
+include 'common-consul'
+include 'common-exceptions'
+include 'common-dto'
+
