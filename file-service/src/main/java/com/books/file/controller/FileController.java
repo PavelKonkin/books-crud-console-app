@@ -40,4 +40,14 @@ public class FileController {
         log.info(messageSource
                 .getMessage("downloadImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
     }
+
+    @DeleteMapping("/books/{id}/image")
+    public ResponseEntity<String> deleteImage(@PathVariable int id) {
+        log.info(messageSource
+                .getMessage("deleteImageBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        ResponseEntity<String> response = fileService.deleteImage(id);
+        log.info(messageSource
+                .getMessage("deleteImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+        return response;
+    }
 }

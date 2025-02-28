@@ -1,4 +1,13 @@
 spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_CONTAINER_NAME:localhost}:9092
+    consumer:
+      # Идентификатор группы потребителей
+      group-id: ${spring.application.name}
+      # Стратегия чтения сообщений
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      auto-commit-interval: 1000
   servlet:
     encoding:
       charset: UTF-8
@@ -9,7 +18,7 @@ spring:
       max-request-size: 1GB
   data:
     mongodb:
-      uri: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${FILES_DB_CONTAINER_NAME:localhost}:27017/${MONGODB_DB_NAME}
+      uri: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${FILES_DB_CONTAINER_NAME:localhost}:27017/${MONGODB_DB_NAME}?authSource=admin
       database: ${MONGODB_DB_NAME}
       password: ${MONGODB_PASSWORD}
       username: ${MONGODB_USER}

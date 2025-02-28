@@ -43,3 +43,8 @@ out/
 *.csv
 *.txt
 /env_vars.sh
+
+kafka_data/*
+consul_data/*
+!consul_data/.gitkeep
+!*.keep

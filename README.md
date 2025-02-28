@@ -1,107 +1,124 @@
-# books-management-app
-Приложение, которое предоставляет возможность:
-Создать книгу со следующими параметрами: название, автор, жанр, краткое описание и сохранить ее в БД.
-Редактировать уже существующую книгу.
-Удалить книгу.
-Получать информацию о всех сохраненных книгах.
-Загружать изображения для книги размером до 1 гигабайта
+# Books Management App
+[English](README.md) | [Русский](README.ru.md)
+## Description
+Books Management App is a book management application that provides the following features:
+- Create books with attributes: title, author, genre, and short description.
+- Edit existing books.
+- Delete books.
+- Retrieve information about all saved books.
+- Upload book images up to 1 GB in size.
 
-Приложение состоит из нескольких микросервисов: books, users, files
+The application consists of several microservices:
+- `Books Service`: Manages books and stores data in PostgreSQL.
+- `Users Service`: Handles user registration and authentication, stores data in PostgreSQL.
+- `Files Service`: Manages uploading and storing book images, data is stored in MongoDB (GridFS).
 
-Информация хранится в базах данных PostgreSQL, отдельных для каждого сервиса books и users
-В сервисе files используется MongoDB
+### Asynchronous Communication
+Kafka is used to implement asynchronous communication between services:
+- When a book is deleted from the books service, the related file in the files service is automatically deleted.
+- When a file is deleted in the files service, the file reference is cleared in the books service.
+- When a file is updated in the files service, the reference to the file is updated in the books service.
+- When a file is updated in the files service and book has file related to it, then that old file is deleted
 
-Все сервисы и базы данных для них запускаются в Docker контейнерах
+## API Requests
 
-Реализован API по адресу http://localhost:8080/api/v1/books
-Поддерживаютя HTTP запросы с методами GET, POST, PUT, DELETE
-Для запросов с методами POST и PUT требуется тело запроса с полями
-```json
-{
-"title": ,
-"authors": [
-{
-"name": 
-},
-"genres": [
-{
-"title": 
-}
-],
-"description": 
-}
-```
-Для обновления существующей книги методом PUT дополнительно в теле требуется поле id со значением id обновляемой книги
+### Books API
+- **URL**: `http://localhost:8080/api/v1/books`
+  - **GET**: Retrieve the list of all books.
+  - **POST**: Create a new book.
+  - **PUT**: Update a book by ID.
+    - Request body:
+      ```json
+      {
+        "id": ,
+        "title": ,
+        "authors": [
+          {"name": }
+        ],
+        "genres": [
+          {"title": }
+        ],
+        "description": 
+      }
+      ```
+  - **DELETE**: Delete a book by ID.
 
-Для метода DELETE нужна переменная пути /{id} - id удаляемой книги
+### Files API
+- **URL**: `http://localhost:8080/api/v1/files/books/{id}/image`
+  - **POST**: Upload an image for a book by ID (up to 1 GB).
+  - **GET**: Retrieve the image for a book by ID.
+  - **DELETE**: Delete the image for a book by ID.
 
-По адресу http://localhost:8080/api/v1/files/books/{id}/image можно загрузить или выгрузить изображение для книги по id книги
-Поддерживаются изображения размером до 1 Гб
-Внутри приложения изображения хранятся в БД MongoDB используя GridFS
+### Auth API
+- **URL**: `http://localhost:8080/api/v1/auth/register`
+  - **POST**: Register a new user.
+    - Request body:
+      ```json
+      {
+        "username": ,
+        "password": 
+      }
+      ```
+- **URL**: `http://localhost:8080/api/v1/auth/login`
+  - **POST**: Authenticate a user.
+    - Request body:
+      ```json
+      {
+        "username": ,
+        "password": 
+      }
+      ```
 
-По адресу http://localhost:8080/api/v1/auth/register реализована регистрация пользователей, 
-тело запроса должно быть вида:
-```json
-{
-"username": ,
-"password": 
-}
-```
-Длина имени минимум 2 символа, пароля минимум 8
-
-По адресу http://localhost:8080/api/v1/auth/login реализована аутентификация пользователей,
-тело запроса должно быть вида:
-```json
-{
-"username": ,
-"password": 
-}
-```
-Длина имени минимум 2 символа, пароля минимум 8
-
-## Дальнейшая разработка
-### Перед тем как начать разработку, у вас должны быть установлены следующие зависимости:
+## Technical Requirements
+Before starting development, make sure to have:
 - Java 17
 - Docker
-- для авторизации в переменную окружения JWT_SECRET нужно прописать свой секрет для Jwt длиной 64 байта закодированный
-в Base64, в application.properties в jwt.secret прописан дефолтный секрет для Jwt длиной 64 байта,
-закодированный в Base64.
-- кроме того должны быть установлены следующие переменные окружения:
-  - CONFIG_SERVICE_PASSWORD - пароль для доступа к сервису хранилища конфигураций config-server
-  - MONGODB_DB_NAME - имя базы данных в MongoDB
-  - MONGODB_USER - имя пользователя MongoDB
-  - MONGODB_PASSWORD - пароль для MongoDB
-  - POSTGRE_BOOKS_DB_NAME - имя базы PostgreSQL для сервиса books
-  - POSTGRE_BOOKS_USER - имя пользователя PostgreSQL для сервиса books
-  - POSTGRE_BOOKS_PASS - пароль PostgreSQL для сервиса books
-  - POSTGRE_USERS_DB_NAME - имя базы PostgreSQL для сервиса users
-  - POSTGRE_USERS_USER - имя пользователя PostgreSQL для сервиса users
-  - POSTGRE_USERS_PASS - пароль PostgreSQL для сервиса users
-  - CONSUL_SERVER_ROLE - тэг для сервисов при их регистрации в Spring Cloud Consul
-  - USERS_DB_CONTAINER_NAME - имя контейнера с БД Postgres для сервиса users
-  - BOOKS_DB_CONTAINER_NAME - имя контейнера с БД Postgres для сервиса books
+- Docker Compose
 
-### Сборка и запуск приложения
-- Для сборки запустите из корня
-  ```bash
-  ./gradlew bootJar
+Additionally, configure the following environment variables:
+- `JWT_SECRET`: secret for JWT (64-byte length, Base64 encoded).
+- `CONFIG_SERVICE_PASSWORD`: password for the config service.
+- `MONGODB_DB_NAME`, `MONGODB_USER`, `MONGODB_PASSWORD`: MongoDB credentials.
+- `POSTGRE_BOOKS_DB_NAME`, `POSTGRE_BOOKS_USER`, `POSTGRE_BOOKS_PASS`: PostgreSQL (books) credentials.
+- `POSTGRE_USERS_DB_NAME`, `POSTGRE_USERS_USER`, `POSTGRE_USERS_PASS`: PostgreSQL (users) credentials.
+- `CONSUL_SERVER_ROLE`, `USERS_DB_CONTAINER_NAME`, `BOOKS_DB_CONTAINER_NAME`, `KAFKA_CONTAINER_NAME`: containers and Consul role.
 
-- Для отладки и разработки запустите сначала необходимые контейнеры
-  ```bash
-  ./gradlew startContainersForDebugAndDevelopment
+## Build and Run
 
-Затем нужно запустить ConfigServerApplication, GatewayApplication
-После этого можно или запускать необходимые сервисы для отладки (BookServiceApplication, UserServiceApplication,
-JwtServiceApplication, FileServiceApplication) или можно запустить конфигурацию RunAllDependableServices, 
-которая запустит их все сразу
-  
+### Build the Application
+```bash
+./gradlew bootJar
+```
 
-- Для запуска всех сервисов в контейнерах - симуляции прода
-  ```bash
-  ./gradlew startProdContainers
+### Run for Development
 
-- Для остановки всех контейнеров
-  ```bash
-  ./gradlew stopContainers
-  
-Отслеживать сервисы, зарегистрированные в Spring Cloud Consul можно на http://localhost:8500/ui/dc1/services
+1. Start the required containers:
+
+   ```bash
+   ./gradlew startContainersForDebugAndDevelopment
+   ```
+
+2. Start the required configurations:
+
+    - ConfigServerApplication
+    - GatewayApplication
+
+3. Start the services:
+
+    - BookServiceApplication
+    - UserServiceApplication
+    - JwtServiceApplication
+    - FileServiceApplication
+   
+      Or use the RunAllDependableServices configuration to start them simultaneously.
+### Run in Containers (Production)
+```bash
+./gradlew startProdContainers
+```
+### Stop Containers
+```bash
+./gradlew stopContainers
+```
+### Consul Monitoring
+Registered services can be monitored at: http://localhost:8500/ui/dc1/services.
+Access to monitoring requires a token generated in ./consul_data when started Consul.

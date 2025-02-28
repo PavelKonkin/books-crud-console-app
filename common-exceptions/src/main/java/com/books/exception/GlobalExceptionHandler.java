@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
     private final MessageSource messageSource;
+    private static final String BAD_REQUEST = "badRequest";
 
     public GlobalExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
@@ -54,7 +55,7 @@ public class GlobalExceptionHandler {
         return new ApiError(errors,
                 message,
                 messageSource
-                        .getMessage("badRequest", null, LocaleContextHolder.getLocale()),
+                        .getMessage(BAD_REQUEST, null, LocaleContextHolder.getLocale()),
                 HttpStatus.BAD_REQUEST.name(),
                 LocalDateTime.now());
     }
@@ -70,7 +71,7 @@ public class GlobalExceptionHandler {
         return new ApiError(errors,
                 ex.getMessage(),
                 messageSource
-                        .getMessage("badRequest", null, LocaleContextHolder.getLocale()),
+                        .getMessage(BAD_REQUEST, null, LocaleContextHolder.getLocale()),
                 HttpStatus.BAD_REQUEST.name(),
                 LocalDateTime.now());
     }
@@ -100,7 +101,7 @@ public class GlobalExceptionHandler {
         return new ApiError(errors,
                 ex.getMessage(),
                 messageSource
-                        .getMessage("badRequest", null, LocaleContextHolder.getLocale()),
+                        .getMessage(BAD_REQUEST, null, LocaleContextHolder.getLocale()),
                 HttpStatus.BAD_REQUEST.name(),
                 LocalDateTime.now());
     }

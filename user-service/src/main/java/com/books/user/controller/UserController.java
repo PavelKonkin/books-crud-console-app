@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         log.info(messageSource
                 .getMessage("registerUserRequestMessage", null,
                         LocaleContextHolder.getLocale()), signupRequest);
@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         log.info(messageSource
                 .getMessage("loginUserRequestMessage", null,
                         LocaleContextHolder.getLocale()), loginRequest);

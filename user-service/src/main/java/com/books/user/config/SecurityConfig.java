@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Сессии без состояния (для JWT)
                 )
-                .addFilterBefore(jwtServiceAuthFilter(), UsernamePasswordAuthenticationFilter.class);  // Добавляем фильтр;
+                .addFilterBefore(jwtServiceAuthFilter(), UsernamePasswordAuthenticationFilter.class);  // Добавляем фильтр
 
         return http.build();
     }

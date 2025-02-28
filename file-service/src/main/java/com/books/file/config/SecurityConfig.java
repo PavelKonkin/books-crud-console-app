@@ -1,5 +1,6 @@
 package com.books.file.config;
 
+import com.books.file.client.JwtFeignClient;
 import com.books.file.util.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    private final JwtFeignClient jwtFeignClient;
+
+    public SecurityConfig(JwtFeignClient jwtFeignClient) {
+        this.jwtFeignClient = jwtFeignClient;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -37,6 +44,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter authenticationJwtTokenFilter() {
-        return new JwtAuthenticationFilter();
+        return new JwtAuthenticationFilter(jwtFeignClient);
     }
 }

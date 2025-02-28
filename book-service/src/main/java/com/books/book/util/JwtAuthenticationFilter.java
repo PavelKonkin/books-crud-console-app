@@ -19,14 +19,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtFeignClient jwtFeignClient;  // Feign клиент для общения с jwt сервисом
 
     @Autowired
-    private JwtFeignClient jwtFeignClient;  // Feign клиент для общения с jwt сервисом
+    public JwtAuthenticationFilter(JwtFeignClient jwtFeignClient) {
+        this.jwtFeignClient = jwtFeignClient;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = new User(
                             validationResponse.getUsername(),
                             "",
-                            validationResponse.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                            validationResponse.getAuthorities().stream().map(SimpleGrantedAuthority::new).toList()
                     );
 
                     JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
