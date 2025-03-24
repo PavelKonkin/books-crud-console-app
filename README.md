@@ -89,6 +89,16 @@ Additionally, configure the following environment variables:
 ```bash
 ./gradlew bootJar
 ```
+### Testing
+Before running integration tests, the application needs to be built as described above, since TestContainers are used for the tests.
+
+Unit and integration tests have been added for the 'book-service' module. To run the tests, execute the standard Gradle task:
+```bash
+./gradlew test
+```
+This will run both unit and integration tests to ensure that the 'book-service' functions as expected.
+
+Tests for all other modules will be added in future updates.
 
 ### Run for Development
 

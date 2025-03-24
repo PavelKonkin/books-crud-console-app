@@ -67,14 +67,14 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createBook(@Valid @RequestBody BookDto bookDto) {
+    public BookDto createBook(@Valid @RequestBody BookDto bookDto) {
         log.info("Получен запрос на создание книги с о свойствами {}", bookDto);
         log.info(messageSource
                 .getMessage("createBookBeforeMessage", null, LocaleContextHolder.getLocale()), bookDto);
-        bookService.create(bookDto);
+        BookDto savedBook = bookService.create(bookDto);
         log.info(messageSource
-                .getMessage("createBookSuccessMessage", null, LocaleContextHolder.getLocale()));
-        log.info("Книга создана");
+                .getMessage("createBookSuccessMessage", null, LocaleContextHolder.getLocale()), savedBook);
+        return savedBook;
     }
 
     @PreAuthorize("hasRole('ADMIN')")

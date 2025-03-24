@@ -2,6 +2,7 @@ package com.books.jwtservice.service;
 
 import com.books.jwtservice.client.ConsulFeignClient;
 import com.books.jwtservice.model.dto.ConsulRegisteredService;
+import com.books.utils.helper.RetryHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,8 @@ public class ConsulServiceCheckerImpl implements ConsulServiceChecker {
     }
 
     public boolean isRegisteredService(String serviceName) {
-        List<ConsulRegisteredService> services = consulClient.getService(serviceName);
+        List<ConsulRegisteredService> services = RetryHelper
+                .executeWithRetry(() -> consulClient.getService(serviceName));
 
         return services.stream()
                 .anyMatch(service -> service.getServiceTags().contains(requiredTag));

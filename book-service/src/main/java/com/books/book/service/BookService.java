@@ -5,7 +5,7 @@ import com.books.dto.BookDto;
 import java.util.List;
 
 public interface BookService {
-    void create(BookDto bookDto);
+    BookDto create(BookDto bookDto);
 
     void update(BookDto bookDto);
 

@@ -31,9 +31,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void create(BookDto bookDto) {
+    public BookDto create(BookDto bookDto) {
         Book book = bookMapper.convertBookDto(bookDto);
-        bookRepository.save(book);
+        Book savedBook = bookRepository.save(book);
+        return bookMapper.convertBook(savedBook);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class BookServiceImpl implements BookService {
                         .getMessage("bookNotFound",null, LocaleContextHolder.getLocale())));
         String fileId = bookToDelete.getImageId();
         bookRepository.delete(bookToDelete);
-        if (!fileId.isEmpty()) {
+        if (fileId != null && !fileId.isEmpty()) {
             // Отправка сообщения в Kafka с id файла в MongoDB
             kafkaTemplate.send(TOPIC_DELETE_BOOK, bookToDelete.getImageId());
         }
