@@ -74,6 +74,8 @@ Before starting development, make sure to have:
 - Java 17
 - Docker
 - Docker Compose
+- Minikube (for local Kubernetes deployment)
+- Helm (for Kubernetes chart installation)
 
 Additionally, configure the following environment variables:
 - `JWT_SECRET`: secret for JWT (64-byte length, Base64 encoded).
@@ -132,3 +134,43 @@ Tests for all other modules will be added in future updates.
 ### Consul Monitoring
 Registered services can be monitored at: http://localhost:8500/ui/dc1/services.
 Access to monitoring requires a token generated in ./consul_data when started Consul.
+
+## Kubernetes Deployment
+
+The project includes Kubernetes manifests located in the k8s/ directory.
+File secrets.example.yaml should be renamed to secrets.yaml and all values of secrets inside of it should be filled.
+
+You can deploy services in two ways:
+
+### Deploy Individual Manifests
+
+To apply individual service manifests, run the following command for each file:
+
+```bash
+kubectl apply -f k8s/<manifest-filename>.yaml
+```
+
+For example:
+```bash
+kubectl apply -f k8s/book-service-deployment.yaml
+```
+### Deploy All at Once Using Kustomize
+To deploy all services and configurations at once using kustomization.yaml, run:
+```bash
+kubectl apply -k k8s/
+```
+### Prometheus Monitoring
+The file microservices-servicemonitor.yaml is also included in the k8s/ directory.
+It can be applied to enable Prometheus monitoring for all microservices exposing the /actuator/prometheus endpoint:
+```bash
+kubectl apply -f k8s/microservices-servicemonitor.yaml
+```
+Make sure Prometheus and the Kubernetes ServiceMonitor CRD are installed (e.g., via the Prometheus Operator) to use this feature.
+
+#### Prometheus with Grafana can be installed with Helm charts
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+kubectl create namespace monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+```

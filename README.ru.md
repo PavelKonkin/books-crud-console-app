@@ -73,6 +73,8 @@ Books Management App — приложение для управления кни
 - Java 17
 - Docker
 - Docker Compose
+- Minikube (для локального деплоя Kubernetes)
+- Helm (для установки чапртов Kubernetes)
 
 Также создайте и настройте переменные окружения:
 - `JWT_SECRET`: секрет для JWT (длина 64 байта, закодированный в Base64).
@@ -125,3 +127,42 @@ Books Management App — приложение для управления кни
 ### Мониторинг Consul
 Мониторинг зарегистрированных сервисов доступен по адресу: http://localhost:8500/ui/dc1/services.
 Для доступа к мониторингу нужно использовать токен, сгенерированный в ./consul_data при старте Consul
+
+## Деплой в Kubernetes
+
+В проект добавлены манифесты Kubernetes, находящиеся в папке k8s/.
+Файл secrets.example.yaml нужно переименовать в secrets.yaml и значения всех секретов в нем должны быть заполнены.
+
+Вы можете развернуть сервисы двумя способами:
+
+### Установка отдельных манифестов
+
+Для установки отдельных сервисов используйте следующую команду для каждого файла:
+
+```bash
+kubectl apply -f k8s/<manifest-filename>.yaml
+```
+
+Пример:
+```bash
+kubectl apply -f k8s/book-service-deployment.yaml
+```
+### Установка всех компонентов сразу через Kustomize
+Чтобы установить все сервисы и конфигурации сразу, используя kustomization.yaml, выполните:
+```bash
+kubectl apply -k k8s/
+```
+### Мониторинг с помощью Prometheus
+Также добавлен файл microservices-servicemonitor.yaml, который можно установить для сбора метрик с эндпойнтов /actuator/prometheus всех микросервисов:
+```bash
+kubectl apply -f k8s/microservices-servicemonitor.yaml
+```
+Убедитесь, что в вашем кластере установлен Prometheus и CRD ServiceMonitor (например, через Prometheus Operator), чтобы эта функция работала корректно.
+
+#### Prometheus и Grafana можно устанвить с помощью Helm
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+kubectl create namespace monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+```

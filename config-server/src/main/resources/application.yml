@@ -13,6 +13,7 @@ spring:
         health-check-interval: 10s
         tags: ${CONSUL_SERVER_ROLE:server}
         acl-token: ${CONSUL_TOKEN:default}
+        prefer-ip-address: true
       host: ${CONSUL_HOST:localhost}
       port: 8500
     config:
@@ -24,3 +25,12 @@ spring:
   security:
     user:
       password: ${CONFIG_SERVICE_PASSWORD}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      probes:
+        enabled: true

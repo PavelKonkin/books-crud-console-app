@@ -49,3 +49,4 @@ consul_data/*
 !consul_data/.gitkeep
 !*.keep
 /.sdkmanrc
+/k8s/secrets.yaml

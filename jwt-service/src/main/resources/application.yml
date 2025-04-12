@@ -10,6 +10,7 @@ spring:
         health-check-interval: 10s
         enabled: true
         tags: ${CONSUL_SERVER_ROLE:server}
+        prefer-ip-address: true
       host: ${CONSUL_HOST:localhost}
       port: 8500
     config:

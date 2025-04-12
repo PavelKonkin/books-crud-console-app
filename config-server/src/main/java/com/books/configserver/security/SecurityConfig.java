@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)  // Отключаем CSRF, так как приложение будет работать в режиме без сессий
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/error").permitAll()
+                        .requestMatchers("/actuator/**", "/error").permitAll()
                         .anyRequest().authenticated()  // Требовать аутентификацию для всех остальных запросов
                 )
                 .httpBasic(Customizer.withDefaults());  // Включаем Basic авторизацию
