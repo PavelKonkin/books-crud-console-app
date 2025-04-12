@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: microservices-app
+
+resources:
+  - namespace.yaml
+  - secrets.yaml
+  - config-server-deployment.yaml
+  - config-server-service.yaml
+  - consul-client-token-secret.yaml
+  - consul-service.yaml
+  - consul-statefulset.yaml
+  - consul-token-updater-cronjob.yaml
+  - consul-token-updater-rb.yaml
+  - consul-token-updater-role.yaml
+  - consul-token-updater-sa.yaml
+  - gateway-deployment.yaml
+  - gateway-service.yaml
+  - jwt-deployment.yaml
+  - jwt-service.yaml
+  - kafka-statefulset.yaml
+  - kafka-service.yaml
+  - user-db-statefulset.yaml
+  - user-db-service.yaml
+  - user-service.yaml
+  - user-deployment.yaml
+  - book-db-service.yaml
+  - book-db-statefulset.yaml
+  - book-service.yaml
+  - book-deployment.yaml
+  - file-db-init-configmap.yaml
+  - file-db-service.yaml
+  - file-db-statefulset.yaml
+  - file-service.yaml
+  - file-deployment.yaml

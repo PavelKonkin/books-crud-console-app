@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: consul-token-updater-cronjob
+  namespace: microservices-app
+spec:
+  # Запускать каждые 5 минут.
+  # Формат: "минуты часы дни_месяца месяцы дни_недели"
+  schedule: "*/5 * * * *"
+
+  # Политика параллельного выполнения:
+  # Forbid - не запускать новый Job, если предыдущий еще не завершился
+  # Replace - остановить текущий Job и запустить новый
+  # Allow - запускать параллельно (не рекомендуется для этой задачи)
+  concurrencyPolicy: Forbid
+
+  # Сколько успешных/неуспешных Job'ов хранить в истории
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+
+  jobTemplate:
+    spec:
+      # Количество попыток для Job'а перед тем, как считать его неудачным
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: consul-token-updater-sa
+          restartPolicy: OnFailure # Политика перезапуска для подов Job'а
+          containers:
+            - name: token-updater
+              image: bitnami/kubectl:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CONSUL_POD_LABEL
+                  value: "app=consul"
+                - name: CONSUL_NAMESPACE
+                  value: "microservices-app"
+                - name: TOKEN_FILE_PATH
+                  value: "/consul/data/service_token.txt"
+                - name: SECRET_NAME
+                  value: "consul-client-token-secret"
+                - name: SECRET_KEY
+                  value: "CONSUL_HTTP_TOKEN"
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "[$(date)] Starting token update check..."
+                  echo "Waiting for Consul pod..."
+                  CONSUL_POD_NAME=""
+                  # Увеличим таймаут ожидания пода (например, 60 секунд)
+                  POD_WAIT_TIMEOUT=60
+                  POD_WAIT_START=$(date +%s)
+                  while [ -z "$CONSUL_POD_NAME" ]; do
+                    NOW=$(date +%s)
+                    if [ $((NOW - POD_WAIT_START)) -ge $POD_WAIT_TIMEOUT ]; then
+                      echo "ERROR: Timeout waiting for Consul pod."
+                      exit 1
+                    fi
+                    CONSUL_POD_NAME=$(kubectl get pods -n $CONSUL_NAMESPACE -l $CONSUL_POD_LABEL -o jsonpath='{.items[?(@.status.phase=="Running")].metadata.name}' 2>/dev/null | head -n 1)
+                    if [ -z "$CONSUL_POD_NAME" ]; then
+                      echo "Consul pod not found or not running yet, sleeping..."
+                      sleep 5
+                    fi
+                  done
+                  echo "Found running Consul pod: $CONSUL_POD_NAME"
+                  
+                  echo "Waiting for Consul pod ($CONSUL_POD_NAME) readiness..."
+                  if ! kubectl wait --for=condition=ready pod/$CONSUL_POD_NAME -n $CONSUL_NAMESPACE --timeout=120s; then
+                     echo "ERROR: Timeout waiting for Consul pod readiness."
+                     exit 1
+                  fi
+                  echo "Consul pod ready."
+                  
+                  # Небольшая задержка перед чтением файла
+                  sleep 5
+                  
+                  echo "Attempting to read token from $CONSUL_POD_NAME:$TOKEN_FILE_PATH..."
+                  TOKEN_VALUE=""
+                  RETRY_COUNT=0
+                  MAX_RETRIES=6
+                  while [ -z "$TOKEN_VALUE" ] && [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+                    TOKEN_VALUE=$(kubectl exec $CONSUL_POD_NAME -n $CONSUL_NAMESPACE -- cat $TOKEN_FILE_PATH 2>/dev/null)
+                    if [ -z "$TOKEN_VALUE" ]; then
+                      echo "Token file not found or empty, retrying ($((RETRY_COUNT+1))/$MAX_RETRIES)..."
+                      RETRY_COUNT=$((RETRY_COUNT+1))
+                      sleep 5
+                    else
+                       # Проверка, что токен не пустой после trim'а пробелов (на всякий случай)
+                       if [ -z "$(echo "$TOKEN_VALUE" | tr -d '[:space:]')" ]; then
+                         echo "Token file exists but content is effectively empty, retrying..."
+                         TOKEN_VALUE="" # Сбросить, чтобы цикл продолжился
+                         RETRY_COUNT=$((RETRY_COUNT+1))
+                         sleep 5
+                       fi
+                    fi
+                  done
+                  
+                  if [ -z "$TOKEN_VALUE" ]; then
+                    echo "ERROR: Failed to retrieve token after multiple retries."
+                    exit 1
+                  fi
+                  
+                  echo "Retrieved token value (length: ${#TOKEN_VALUE})."
+                  ENCODED_TOKEN=$(echo -n "$TOKEN_VALUE" | base64)
+                  CURRENT_ENCODED_TOKEN=$(kubectl get secret $SECRET_NAME -n $CONSUL_NAMESPACE -o jsonpath="{.data.$SECRET_KEY}" 2>/dev/null || echo "")
+                  
+                  if [ "$ENCODED_TOKEN" == "$CURRENT_ENCODED_TOKEN" ]; then
+                     echo "Token in secret $SECRET_NAME is already up-to-date. No patch needed."
+                     exit 0 # Успешно завершить, если токен не изменился
+                  fi
+                  
+                  echo "Token has changed. Patching secret $SECRET_NAME..."
+                  kubectl patch secret $SECRET_NAME -n $CONSUL_NAMESPACE \
+                    --type='json' \
+                    -p='[{"op": "replace", "path": "/data/'$SECRET_KEY'", "value":"'$ENCODED_TOKEN'"}]'
+                  
+                  if [ $? -eq 0 ]; then
+                    echo "Secret $SECRET_NAME updated successfully."
+                  else
+                    echo "ERROR: Failed to patch secret $SECRET_NAME."
+                    exit 1
+                  fi

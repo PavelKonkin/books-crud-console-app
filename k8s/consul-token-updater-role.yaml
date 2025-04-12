@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: consul-token-updater-role
+  namespace: microservices-app
+rules:
+  - apiGroups: [""] # Core API group
+    resources: ["pods"]
+    verbs: ["get", "list"] # To find the consul pod
+  - apiGroups: [""] # Core API group
+    resources: ["pods/exec"]
+    verbs: ["create"] # To execute 'cat' inside the consul pod
+  - apiGroups: [""] # Core API group
+    resources: ["secrets"]
+    verbs: ["get", "patch", "update"] # To update consul-client-token-secret

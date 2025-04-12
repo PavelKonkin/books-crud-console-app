@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: book-db
+  namespace: microservices-app
+  labels:
+    app: book-db
+spec:
+  serviceName: "postgres-book"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-db
+  template:
+    metadata:
+      labels:
+        app: book-db
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: postgres
+          image: postgres:14-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "0.7"
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_PASS } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_USER } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_DB_NAME } }
+          volumeMounts:
+            - name: book-db-data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              # Запускаем команду внутри контейнера
+              command:
+                - "sh"
+                - "-c"
+                # Используем pg_isready для проверки.
+                # -h localhost: Проверяем сервер на localhost (внутри контейнера).
+                # -U $(POSTGRES_USER): Используем имя пользователя из переменной окружения.
+                # -d $(POSTGRES_DB): Проверяем готовность конкретной базы данных.
+                # -q: Тихий режим (не выводить сообщения, важен только код возврата).
+                - "pg_isready -h localhost -U $(POSTGRES_BOOK) -d $(POSTGRES_DB) -q"
+            initialDelaySeconds: 15 # Можно немного увеличить, т.к. DB нужно время на инициализацию
+            periodSeconds: 10      # Как часто проверять
+            timeoutSeconds: 5       # Сколько ждать ответа от команды
+            failureThreshold: 3     # Сколько неудачных попыток до статуса NotReady
+            successThreshold: 1     # Сколько удачных попыток для статуса Ready
+            # Похожая проверка, но для определения, что контейнер "жив" и его не нужно перезапускать.
+          livenessProbe:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - "pg_isready -h localhost -U $(POSTGRES_BOOK) -d $(POSTGRES_DB) -q"
+            initialDelaySeconds: 30 # Обычно больше, чем у readiness
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5     # Больше попыток перед перезапуском
+  volumeClaimTemplates:
+    - metadata:
+        name: book-db-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 2Gi

@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: microservices-app
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      initContainers:
+        - name: wait-for-consul-token
+          image: busybox:1.35
+          imagePullPolicy: IfNotPresent
+          command: [ 'sh', '-c', 'echo "Checking for /consul/data/service_token.txt..."; while [ ! -s "/consul/data/service_token.txt" ]; do sleep 2; done; echo "Token file found."' ]
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data
+              readOnly: true
+      containers:
+        - name: user-service
+          image: dmfan/user-service:v.1.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: CONFIG_SERVICE_PASSWORD } }
+#            - name: SPRING_DATASOURCE_URL
+#              value: jdbc:postgresql://postgres-user:5432/$(POSTGRES_DB_NAME)
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_USERS_USER } }
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_USERS_PASS } }
+            - name: POSTGRES_DB_NAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_USERS_DB_NAME } }
+            - name: CONSUL_HOST
+              value: consul
+                # Добавляем command и args для подстановки
+          command: [ "/bin/sh", "-c" ]
+          args:
+                  - |
+                    # Экспортируем переменную с подставленным значением
+                    export SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-user:5432/${POSTGRES_DB_NAME}"
+                    # Запускаем оригинальную команду вашего контейнера
+                    # Замените 'java -jar /app.jar' на реальную команду запуска вашего приложения
+                    # Использование 'exec' важно, чтобы ваше приложение стало процессом PID 1 (или заменило shell), 
+                    # что позволяет ему корректно получать сигналы (например, SIGTERM) от Kubernetes.
+                    exec java -jar /app.jar
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data/service_token.txt
+              subPath: service_token.txt
+              readOnly: true
+      volumes:
+        - name: consul-token-file-mount
+          secret:
+            secretName: consul-client-token-secret
+            items:
+              - key: CONSUL_HTTP_TOKEN
+                path: service_token.txt
