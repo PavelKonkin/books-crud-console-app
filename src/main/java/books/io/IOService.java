@@ -16,4 +16,8 @@ public interface IOService {
     void showMessage(String message);
 
     void printBooksList(List<BookDto> books);
+
+    void setLocale();
+
+    void showIvalidIdMessage();
 }
