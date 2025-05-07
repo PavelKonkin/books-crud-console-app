@@ -16,19 +16,16 @@ import java.util.stream.Collectors;
 public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
     private final BookStorage bookStorage;
-    private final BookIdGenerator bookIdGenerator;
 
 
     @Autowired
-    public BookServiceImpl(BookMapper bookMapper, BookStorage bookStorage, BookIdGenerator bookIdGenerator) {
+    public BookServiceImpl(BookMapper bookMapper, BookStorage bookStorage) {
         this.bookMapper = bookMapper;
         this.bookStorage = bookStorage;
-        this.bookIdGenerator = bookIdGenerator;
     }
 
     @Override
     public void create(BookDto bookDto) throws IOException {
-        bookDto.setId(bookIdGenerator.generateId());
         Book book = bookMapper.convertBookDto(bookDto);
         bookStorage.add(book);
     }

@@ -4,13 +4,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder(toBuilder = true)
 public class BookDto {
     private Integer id;
     private String title;
-    private String author;
+    private List<AuthorDto> authors;
+    private List<GenreDto> genres;
     private String description;
 
     @Override
@@ -18,7 +21,8 @@ public class BookDto {
         return "BookDto{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
+                ", authors=" + authors +
+                ", genres=" + genres +
                 ", description='" + description + '\'' +
                 '}';
     }
