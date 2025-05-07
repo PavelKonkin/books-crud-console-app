@@ -1,0 +1,220 @@
+
+services:
+  consul:
+    build: ./consul
+#    container_name: consul
+    volumes:
+      - ./consul_data:/consul/data/
+    ports:
+      - "8500:8500"
+    networks:
+      internal_network:
+  kafka:
+    image: bitnami/kafka:latest
+#    container_name: ${KAFKA_CONTAINER_NAME:-kafka}
+    networks:
+      internal_network:
+    volumes:
+      - ./kafka_data:/bitnami/kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_LOG_RETENTION_HOURS: 168  # 7 дней
+      KAFKA_CFG_LOG_RETENTION_BYTES: 1073741824  # 1GB
+  config-server:
+    build: ./config-server
+#    container_name: config-server
+    restart: always
+    depends_on:
+      consul:
+        condition: service_healthy
+    networks:
+      internal_network:
+#      - internal_network
+    volumes:
+      - ./consul_data:/consul/data/
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      CONSUL_HOST: consul
+  gateway:
+    build: ./gateway
+#    container_name: gateway
+    depends_on:
+       config-server:
+         condition: service_healthy
+    restart: always
+    networks:
+      internal_network:
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./consul_data:/consul/data/
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      CONSUL_HOST: consul
+  user-service:
+    build: ./user-service
+#    container_name: user-service
+    restart: always
+    networks:
+      internal_network:
+    volumes:
+      - ./consul_data:/consul/data/
+    depends_on:
+      config-server:
+          condition: service_healthy
+      user-db:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/${POSTGRE_USERS_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRE_USERS_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRE_USERS_PASS}
+      CONSUL_HOST: consul
+      USERS_DB_CONTAINER_NAME: postgres_user
+  book-service:
+    build: ./book-service
+#    container_name: book-service
+    restart: always
+    networks:
+      internal_network:
+    volumes:
+      - ./consul_data:/consul/data/
+    depends_on:
+      config-server:
+        condition: service_healthy
+      book-db:
+        condition: service_started
+      kafka:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://book-db:5432/${POSTGRE_BOOKS_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRE_BOOKS_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRE_BOOKS_PASS}
+      CONSUL_HOST: consul
+      BOOKS_DB_CONTAINER_NAME: postgres_book
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_CONTAINER_NAME:-kafka}:9092
+  file-service:
+    build: ./file-service
+#    container_name: file-service
+    restart: always
+    networks:
+      internal_network:
+    volumes:
+      - ./consul_data:/consul/data/
+    depends_on:
+      config-server:
+        condition: service_healthy
+      file-db:
+        condition: service_started
+      kafka:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@file-db:27017/${MONGODB_DB_NAME}?authSource=admin # URI подключения к MongoDB
+      SPRING_DATA_MONGODB_USERNAME: ${MONGODB_USER} # Пользователь MongoDB
+      SPRING_DATA_MONGODB_PASSWORD: ${MONGODB_PASSWORD} # Пароль пользователя MongoDB
+      SPRING_DATA_MONGODB_DATABASE: ${MONGODB_DB_NAME}
+      CONSUL_HOST: consul
+      FILES_DB_CONTAINER_NAME: file-db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_CONTAINER_NAME:-kafka}:9092
+  jwt-service:
+    build: ./jwt-service
+#    container_name: jwt-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+    restart: always
+    networks:
+      internal_network:
+    volumes:
+      - ./consul_data:/consul/data/
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CONSUL_HOST: consul
+  user-db:
+    image: postgres:14-alpine
+#    volumes:
+#      - user-data:/var/lib/postgresql/data
+#    container_name: postgres_user
+    restart: always
+    networks:
+      internal_network:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRE_USERS_PASS}
+      POSTGRES_USER: ${POSTGRE_USERS_USER}
+      POSTGRES_DB: ${POSTGRE_USERS_DB_NAME}
+  book-db:
+    image: postgres:14-alpine
+#    volumes:
+#      - book-data:/var/lib/postgresql/data
+#    container_name: postgres_book
+    restart: always
+    networks:
+      internal_network:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRE_BOOKS_PASS}
+      POSTGRES_USER: ${POSTGRE_BOOKS_USER}
+      POSTGRES_DB: ${POSTGRE_BOOKS_DB_NAME}
+  file-db:
+    image: mongo:latest
+#    container_name: file-db
+    restart: always
+    networks:
+      internal_network:
+    volumes:
+#      - file-data:/data/db # Указываем volume для сохранения данных
+      - ./mongodb:/docker-entrypoint-initdb.d/
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGODB_DB_NAME} # Имя базы данных
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER} # Корневой пользователь
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD} # Пароль корневого пользователя
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Custom entrypoint"
+        ls -l /docker-entrypoint-initdb.d/
+        docker-entrypoint.sh mongod
+#volumes:
+#  user-data:
+#  book-data:
+#  file-data:
+networks:
+  internal_network:
+    driver: bridge

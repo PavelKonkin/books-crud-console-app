@@ -7,6 +7,7 @@ import com.books.user.model.User;
 import com.books.user.model.dto.SignupRequest;
 import com.books.user.model.dto.UserRole;
 import com.books.user.repository.UserRepository;
+import com.books.utils.helper.RetryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
         // Если аутентификация прошла успешно, запрашиваем токен у jwt-service
 
-        return jwtFeignClient.generateJwtToken(username);
+        return RetryHelper.executeWithRetry(() -> jwtFeignClient.generateJwtToken(username));
     }
 
     @Override

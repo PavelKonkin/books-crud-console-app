@@ -48,3 +48,4 @@ kafka_data/*
 consul_data/*
 !consul_data/.gitkeep
 !*.keep
+/.sdkmanrc

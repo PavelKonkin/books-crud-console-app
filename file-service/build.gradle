@@ -32,6 +32,7 @@ dependencies {
     implementation project(':common-consul')
     implementation project(':common-exceptions')
     implementation project(':common-dto')
+    implementation project(':common-utils')
 
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'

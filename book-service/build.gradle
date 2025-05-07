@@ -35,6 +35,7 @@ dependencies {
     implementation project(':common-consul')
     implementation project(':common-exceptions')
     implementation project(':common-dto')
+    implementation project(':common-utils')
 
     runtimeOnly 'org.postgresql:postgresql:42.2.5'
 
@@ -44,6 +45,24 @@ dependencies {
     implementation 'org.ehcache:ehcache:3.10.8'
     implementation 'org.hibernate.orm:hibernate-jcache:6.6.1.Final'
     implementation 'javax.cache:cache-api:1.1.1'
+
+    // Зависимости для юнит-тестов
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+
+    // Зависимости для интеграционных тестов
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation project(':user-service')
+
+    // Зависимости для Testcontainers
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:mongodb'
+    testImplementation 'org.testcontainers:kafka'
+
+    // Hamcrest для человекочитаемых asserts
+    testImplementation 'org.hamcrest:hamcrest'
 }
 
 dependencyManagement {
@@ -57,3 +76,6 @@ checkstyle {
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 
+tasks.named('test') {
+    useJUnitPlatform() // Включаем JUnit 5
+}

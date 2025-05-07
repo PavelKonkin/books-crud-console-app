@@ -4,6 +4,7 @@ import com.books.dto.JwtValidationResponse;
 import com.books.dto.TokenRequest;
 import com.books.dto.UserDto;
 import com.books.jwtservice.client.UserFeignClient;
+import com.books.utils.helper.RetryHelper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -47,7 +48,7 @@ public class JwtServiceImpl implements JwtService {
     public JwtValidationResponse validateTokenAndGetUserInfo(TokenRequest tokenRequest, HttpServletRequest request) {
         checkService(request);
         String token = tokenRequest.getToken();
-        UserDto user = userFeignClient.getUser(getUsernameFromJwtToken(token));
+        UserDto user = RetryHelper.executeWithRetry(() -> userFeignClient.getUser(getUsernameFromJwtToken(token)));
         return new JwtValidationResponse(validateJwtToken(token), user.getUsername(), List.of(user.getRole()));
     }
 

@@ -3,6 +3,7 @@ package com.books.file.service;
 import com.books.dto.BookDto;
 import com.books.file.client.BooksFeignClient;
 import com.books.file.repository.FileRepository;
+import com.books.utils.helper.RetryHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public ResponseEntity<String> uploadImage(int id, MultipartFile file) {
         try {
-            BookDto book = booksFeignClient.getBook(getJwtToken(), id);
+            BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
             String oldImageId = book.getImageId();
             String imageId = fileRepository.storeFile(file);
             book.setImageId(imageId);
@@ -65,7 +66,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void downloadImage(int id, HttpServletResponse response) {
-        BookDto book = booksFeignClient.getBook(getJwtToken(), id);
+        BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
         try {
             fileRepository.downloadFile(book.getImageId(), response);
         } catch (Exception e) {
@@ -82,7 +83,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public ResponseEntity<String> deleteImage(int id) {
         try {
-            BookDto book = booksFeignClient.getBook(getJwtToken(), id);
+            BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
             String imageId = book.getImageId();
             delete(imageId);
             book.setImageId(null);

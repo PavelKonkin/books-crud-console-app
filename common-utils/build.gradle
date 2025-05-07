@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.books.utils'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common-exceptions')
+}
+

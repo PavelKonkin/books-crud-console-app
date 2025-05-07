@@ -3,6 +3,7 @@ package com.books.file.util;
 import com.books.dto.JwtValidationResponse;
 import com.books.dto.TokenRequest;
 import com.books.file.client.JwtFeignClient;
+import com.books.utils.helper.RetryHelper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = parseJwt(request);  // Получаем токен из заголовка
             if (jwt != null) {
-                JwtValidationResponse validationResponse = jwtFeignClient.validateJwtToken(new TokenRequest(jwt));  // Отправляем токен на проверку
+                JwtValidationResponse validationResponse = RetryHelper
+                        .executeWithRetry(() -> jwtFeignClient.validateJwtToken(new TokenRequest(jwt)));  // Отправляем токен на проверку
 
                 if (validationResponse.isValid()) {  // Проверка валидности
                     UserDetails userDetails = new User(

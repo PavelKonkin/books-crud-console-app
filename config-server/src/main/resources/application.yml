@@ -18,7 +18,9 @@ spring:
     config:
       server:
         native:
-          search-locations: "classpath:/config/"  # Указываем путь к конфигурационным файлам в ресурсах
+          search-locations: classpath:/config/ #Указываем путь к конфигурационным файлам в ресурсах
+#          search-locations: src/main/resources/config/  # Указываем путь к конфигурационным файлам в ресурсах
+
   security:
     user:
       password: ${CONFIG_SERVICE_PASSWORD}
