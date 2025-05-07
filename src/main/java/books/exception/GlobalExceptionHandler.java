@@ -118,6 +118,20 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now());
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleNotFoundException(NotFoundException ex) {
+        log.info(messageSource
+                .getMessage("notFoundException", null, LocaleContextHolder.getLocale()) + ex.getMessage());
+        List<String> errors = getStackTrace(ex);
+        return new ApiError(errors,
+                ex.getMessage(),
+                messageSource.getMessage("requiredObjectWasNotFound", null, LocaleContextHolder.getLocale()),
+                HttpStatus.NOT_FOUND.name(),
+                LocalDateTime.now());
+
+    }
+
     private List<String> getStackTrace(Throwable ex) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

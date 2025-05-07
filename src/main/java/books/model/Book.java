@@ -45,4 +45,6 @@ public class Book {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<Genre> genres;
     private String description;
+    @Column(name = "image_id")
+    private String imageId;
 }

@@ -21,6 +21,7 @@ public class BookMapper {
                 .authors(authorMapper.convertAuthorDtoList(bookDto.getAuthors()))
                 .genres(genreMapper.convertGenreDtoList(bookDto.getGenres()))
                 .description(bookDto.getDescription())
+                .imageId(bookDto.getImageId())
                 .build();
     }
 
@@ -31,6 +32,7 @@ public class BookMapper {
                 .authors(authorMapper.convertAuthorList(book.getAuthors()))
                 .genres(genreMapper.convertGenreList(book.getGenres()))
                 .description(book.getDescription())
+                .imageId(book.getImageId())
                 .build();
     }
 }
