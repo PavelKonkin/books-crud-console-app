@@ -45,3 +45,12 @@ server:
   error:
     whitelabel:
       enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      probes:
+        enabled: true

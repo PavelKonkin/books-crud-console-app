@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-service
+  namespace: microservices-app
+  labels:
+    app: book-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-service
+  template:
+    metadata:
+      labels:
+        app: book-service
+    spec:
+      initContainers:
+        - name: wait-for-consul-token
+          image: busybox:1.35
+          imagePullPolicy: IfNotPresent
+          command: [ 'sh', '-c', 'echo "Checking for /consul/data/service_token.txt..."; while [ ! -s "/consul/data/service_token.txt" ]; do sleep 2; done; echo "Token file found."' ]
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data
+              readOnly: true
+      containers:
+        - name: book-service
+          image: dmfan/book-service:v.1.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+              name: http
+            - containerPort: 9010
+              name: jmx
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: CONFIG_SERVICE_PASSWORD } }
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_USER } }
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_PASS } }
+            - name: POSTGRES_DB_NAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: POSTGRE_BOOKS_DB_NAME } }
+            - name: CONSUL_HOST
+              value: consul
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+            - name: JAVA_TOOL_OPTIONS
+              value: >
+                  -Dcom.sun.management.jmxremote
+                  -Dcom.sun.management.jmxremote.port=9010
+                  -Dcom.sun.management.jmxremote.rmi.port=9010
+                  -Dcom.sun.management.jmxremote.authenticate=false
+                  -Dcom.sun.management.jmxremote.ssl=false
+                  -Djava.rmi.server.hostname=127.0.0.1
+                  -Dcom.sun.management.jmxremote.local.only=false
+              # Добавляем command и args для подстановки
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              # Экспортируем переменную с подставленным значением
+              export SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-book:5432/${POSTGRES_DB_NAME}"
+              # Запускаем оригинальную команду вашего контейнера
+              # Замените 'java -jar /app.jar' на реальную команду запуска вашего приложения
+              # Использование 'exec' важно, чтобы ваше приложение стало процессом PID 1 (или заменило shell), 
+              # что позволяет ему корректно получать сигналы (например, SIGTERM) от Kubernetes.
+              exec java -jar /app.jar
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data/service_token.txt
+              subPath: service_token.txt
+              readOnly: true
+      volumes:
+        - name: consul-token-file-mount
+          secret:
+            secretName: consul-client-token-secret
+            items:
+              - key: CONSUL_HTTP_TOKEN
+                path: service_token.txt

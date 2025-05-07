@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-service
+  namespace: microservices-app
+  labels:
+    app: file-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-service
+  template:
+    metadata:
+      labels:
+        app: file-service
+    spec:
+      containers:
+        - name: file-service
+          image: dmfan/file-service:v.1.0.1
+          ports:
+            - containerPort: 8083
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: CONFIG_SERVICE_PASSWORD } }
+            - name: SPRING_DATA_MONGODB_USERNAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_USER } }
+            - name: SPRING_DATA_MONGODB_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_PASSWORD } }
+            - name: SPRING_DATA_MONGODB_DATABASE
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_DB_NAME } }
+            - name: MONGODB_USER
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_USER } }
+            - name: MONGODB_PASSWORD
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_PASSWORD } }
+            - name: MONGODB_DB_NAME
+              valueFrom: { secretKeyRef: { name: app-secrets, key: MONGODB_DB_NAME } }
+            - name: CONSUL_HOST
+              value: consul
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              # Экспортируем переменную с подставленным значением
+              export SPRING_DATA_MONGODB_URI="mongodb://$(MONGODB_USER):$(MONGODB_PASSWORD)@file-db:27017/$(MONGODB_DB_NAME)?authSource=admin"
+              # Запускаем оригинальную команду вашего контейнера
+              # Замените 'java -jar /app.jar' на реальную команду запуска вашего приложения
+              # Использование 'exec' важно, чтобы ваше приложение стало процессом PID 1 (или заменило shell), 
+              # что позволяет ему корректно получать сигналы (например, SIGTERM) от Kubernetes.
+              exec java -jar /app.jar
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data/service_token.txt
+              subPath: service_token.txt
+              readOnly: true
+      volumes:
+        - name: consul-token-file-mount
+          secret:
+            secretName: consul-client-token-secret
+            items:
+              - key: CONSUL_HTTP_TOKEN
+                path: service_token.txt

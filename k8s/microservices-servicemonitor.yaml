@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: microservices-monitor
+  # Неймспейс, где установлен Prometheus (monitoring)
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - user-service
+          - book-service
+          - config-server
+          - gateway
+          - jwt-service
+          - file-service
+  namespaceSelector:
+    matchNames:
+      - microservices-app # Неймспейс микросервисов
+  # Описываем эндпоинт(ы) для сбора метрик на найденных сервисах
+  endpoints:
+    - port: http
+      path: /actuator/prometheus # Путь к эндпоинту метрик
+      interval: 15s
+      scrapeTimeout: 10s

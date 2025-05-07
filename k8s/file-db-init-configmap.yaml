@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: file-db-init-scripts
+  namespace: microservices-app
+data:
+        init-mongo.sh: |
+          echo "Starting MongoDB initialization"
+
+          mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin <<EOF
+          use ${MONGODB_DB_NAME}
+          db.createUser({
+            user: "${MONGODB_USER}",
+            pwd: "${MONGODB_PASSWORD}",
+            roles: [
+              {
+                role: "readWrite",
+                db: "${MONGODB_DB_NAME}"
+              }
+            ]
+          })
+          EOF
+
+          echo "MongoDB initialization complete"
+        mongo_users.js: |
+          print("Creating application user...");
+  
+          db = db.getSiblingDB('${MONGODB_DB_NAME}');
+          db.createUser({
+          user: "${MONGODB_USER}",
+          pwd: "${MONGODB_PASSWORD}",
+          roles: [
+                   {
+                     role: "readWrite",
+                     db: "${MONGODB_DB_NAME}"
+                     }
+                 ]
+          });

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: microservices-app
+  labels:
+    app: kafka
+spec:
+  serviceName: "kafka"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: kafka
+          image: bitnami/kafka:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "768Mi"  # Запрашиваем 1 ГБ памяти
+              cpu: "500m"   # Запрашиваем 0.5 ядра CPU (500 millicores)
+            limits:
+              memory: "1.5Gi"  # Ограничиваем максимум 2 ГБ памяти
+              cpu: "2"      # Ограничиваем максимум 1 ядром CPU
+          ports:
+            - containerPort: 9092
+              name: plaintext
+            - containerPort: 9093
+              name: controller
+          env:
+            - name: KAFKA_CFG_NODE_ID
+              value: "1"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092,CONTROLLER://:9093"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka-0.kafka.microservices-app.svc.cluster.local:9092"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "1@kafka-0.kafka.microservices-app.svc.cluster.local:9093"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_CFG_LOG_RETENTION_HOURS
+              value: "168"
+            - name: KAFKA_CFG_LOG_RETENTION_BYTES
+              value: "1073741824"
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xms1G -Xmx1G"
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /bitnami/kafka
+          readinessProbe:
+            exec:
+              # Выполняем скрипт проверки API брокера
+              command:
+                - /bin/bash # Или /bin/sh
+                - -ec       # -e: выход при ошибке, -c: выполнить строку
+                # Проверяем localhost:9092 (PLAINTEXT listener)
+                # Эта команда проверяет, что брокер слушает порт и отвечает на базовые запросы Kafka
+                - |
+                  kafka-broker-api-versions.sh --bootstrap-server localhost:9092
+            initialDelaySeconds: 30 # Даем Kafka время на запуск и регистрацию в кворуме
+            periodSeconds: 15      # Частота проверки
+            timeoutSeconds: 10      # Время ожидания ответа от команды
+            failureThreshold: 3     # Кол-во неудач до статуса NotReady
+            successThreshold: 1     # Кол-во успехов для статуса Ready
+          livenessProbe:
+                exec:
+                  # Используем ту же команду, но с другими параметрами времени/порогов
+                  command:
+                    - /bin/bash # Или /bin/sh
+                    - -ec
+                    - |
+                      kafka-broker-api-versions.sh --bootstrap-server localhost:9092
+                initialDelaySeconds: 60 # Начинаем проверять "живость" позже, чем готовность
+                periodSeconds: 30      # Проверяем реже
+                timeoutSeconds: 10
+                failureThreshold: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

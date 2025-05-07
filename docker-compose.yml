@@ -91,6 +91,8 @@ services:
         condition: service_started
       kafka:
         condition: service_started
+    ports:
+      - "9010:9010"
     environment:
       CONFIG_SERVICE_PASSWORD: ${CONFIG_SERVICE_PASSWORD}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_book:5432/${POSTGRE_BOOKS_DB_NAME}
@@ -99,6 +101,14 @@ services:
       CONSUL_HOST: consul
       BOOKS_DB_CONTAINER_NAME: postgres_book
       SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_CONTAINER_NAME:-kafka}:9092
+      JAVA_TOOL_OPTIONS: >
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9010
+        -Dcom.sun.management.jmxremote.rmi.port=9010
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=localhost
+        -Dcom.sun.management.jmxremote.local.only=false
   file-service:
     build: ./file-service
     container_name: file-service

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: microservices-app
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      initContainers:
+        - name: wait-for-consul-token
+          image: busybox:1.35
+          imagePullPolicy: IfNotPresent
+          command: [ 'sh', '-c', 'echo "Checking for /consul/data/service_token.txt..."; while [ ! -s "/consul/data/service_token.txt" ]; do sleep 2; done; echo "Token file found."' ]
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data
+              readOnly: true
+      containers:
+        - name: gateway
+          image: dmfan/gateway:v.1.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "0.5"
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: CONFIG_SERVICE_PASSWORD
+            - name: CONSUL_HOST
+              value: consul
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: consul-token-file-mount
+              mountPath: /consul/data/service_token.txt
+              subPath: service_token.txt
+              readOnly: true
+      volumes:
+        - name: consul-token-file-mount
+          secret:
+            secretName: consul-client-token-secret
+            items:
+              - key: CONSUL_HTTP_TOKEN
+                path: service_token.txt
