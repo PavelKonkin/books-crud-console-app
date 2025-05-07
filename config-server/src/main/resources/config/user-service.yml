@@ -1,0 +1,21 @@
+server:
+  port: 8081  # Порт user-service
+
+spring:
+  jpa:
+    hibernate.ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        show_sql: true
+        generate-ddl: false
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${USERS_DB_CONTAINER_NAME:localhost}:6543/${POSTGRE_USERS_DB_NAME}
+    username: ${POSTGRE_USERS_USER}
+    password: ${POSTGRE_USERS_PASS}
+
+  sql.init:
+    mode: always
+    schema-locations: classpath:schema.sql
