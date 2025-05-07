@@ -17,7 +17,8 @@ checkstyle {
 task startContainersForDebugAndDevelopment(type: Exec) {
     group = 'application'
     workingDir '.' // Путь к файлу docker-compose.yml
-    commandLine 'docker', 'compose', 'up', '-d', 'consul', 'user-db', 'book-db', 'file-db'
+    commandLine 'docker', 'compose', '-f', 'docker-compose.yml', '-f', 'docker-compose.dev.yml', 'up', '-d',
+            'consul', 'user-db', 'book-db', 'file-db', 'kafka'
 }
 
 task stopContainers(type: Exec) {

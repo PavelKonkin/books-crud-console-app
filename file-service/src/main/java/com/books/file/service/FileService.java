@@ -8,4 +8,8 @@ public interface FileService {
     ResponseEntity<String> uploadImage(int id, MultipartFile file);
 
     void downloadImage(int id, HttpServletResponse response);
+
+    void delete(String fileId);
+
+    ResponseEntity<String> deleteImage(int id);
 }

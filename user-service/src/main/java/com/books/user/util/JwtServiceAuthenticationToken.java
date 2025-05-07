@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class JwtServiceAuthenticationToken extends AbstractAuthenticationToken {
 
@@ -23,5 +24,16 @@ public class JwtServiceAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return secret;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        return Objects.equals(secret, ((JwtServiceAuthenticationToken) o).secret);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), secret);
     }
 }

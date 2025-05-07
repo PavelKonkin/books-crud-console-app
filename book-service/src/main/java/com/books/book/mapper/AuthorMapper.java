@@ -13,7 +13,7 @@ public class AuthorMapper {
     public List<AuthorDto> convertAuthorList(Set<Author> authors) {
         return authors.stream()
                 .map(this::convertAuthorToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public AuthorDto convertAuthorToDto(Author author) {

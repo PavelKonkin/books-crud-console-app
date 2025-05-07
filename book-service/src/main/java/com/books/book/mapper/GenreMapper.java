@@ -13,7 +13,7 @@ public class GenreMapper {
     public List<GenreDto> convertGenreList(Set<Genre> genres) {
         return genres.stream()
                 .map(this::convertGenreToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public GenreDto convertGenreToDto(Genre genre) {

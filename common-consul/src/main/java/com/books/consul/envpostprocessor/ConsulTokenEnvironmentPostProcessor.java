@@ -1,5 +1,7 @@
 package com.books.consul.envpostprocessor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -10,7 +12,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.logging.Logger;
 
+@Slf4j
 public class ConsulTokenEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -21,10 +25,9 @@ public class ConsulTokenEnvironmentPostProcessor implements EnvironmentPostProce
             environment.getPropertySources().addFirst(
                     new MapPropertySource("consulTokenSource", Collections.singletonMap("spring.cloud.consul.discovery.acl-token", token))
             );
-//            System.out.println("Bootstrap token установлен: " + token);
         } catch (IOException e) {
             // Если токен не найден, можно залогировать предупреждение или выбросить исключение
-            System.err.println("Не удалось прочитать токен из /consul/data/service_token.txt: " + e.getMessage());
+            log.info("Не удалось прочитать токен из /consul/data/service_token.txt: " + e.getMessage());
         }
     }
 

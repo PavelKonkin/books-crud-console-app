@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -60,7 +61,7 @@ public class FileRepositoryImpl implements FileRepository {
     }
 
     @Override
-    public void downloadFile(String id, HttpServletResponse response) throws IOException {
+    public void downloadFile(String id, HttpServletResponse response) {
         GridFSFile gridFSFile = getFile(id);
         if (gridFSFile == null) {
             throw new NotFoundException(messageSource
@@ -84,9 +85,14 @@ public class FileRepositoryImpl implements FileRepository {
             }
 
             os.flush(); // Убедимся, что все данные отправлены
-        } catch (IOException e) {
-            throw new RuntimeException(messageSource
+        } catch (Exception e) {
+            throw new InvalidDataAccessApiUsageException(messageSource
                     .getMessage("errorDownloadingFile", null, LocaleContextHolder.getLocale()), e);
         }
+    }
+
+    @Override
+    public void deleteFile(String fileId) {
+        gridFsTemplate.delete(Query.query(Criteria.where("_id").is(fileId)));
     }
 }

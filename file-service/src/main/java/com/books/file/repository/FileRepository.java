@@ -12,4 +12,6 @@ public interface FileRepository {
     GridFSFile getFile(String id);
 
     void downloadFile(String id, HttpServletResponse response) throws IOException;
+
+    void deleteFile(String fileId);
 }
