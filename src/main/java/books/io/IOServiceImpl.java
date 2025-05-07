@@ -242,7 +242,7 @@ public class IOServiceImpl implements IOService {
     }
 
     @Override
-    public void showIvalidIdMessage() {
+    public void showInvalidIdMessage() {
         System.out.println(messageSource.getMessage("invalidBookIdMessage", null, currentLocale));
     }
 

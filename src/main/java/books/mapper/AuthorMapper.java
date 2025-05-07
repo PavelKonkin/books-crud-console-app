@@ -5,11 +5,12 @@ import books.model.dto.AuthorDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class AuthorMapper {
-    public List<AuthorDto> convertAuthorList(List<Author> authors) {
+    public List<AuthorDto> convertAuthorList(Set<Author> authors) {
         return authors.stream()
                 .map(this::convertAuthorToDto)
                 .collect(Collectors.toList());
@@ -21,10 +22,10 @@ public class AuthorMapper {
                 .build();
     }
 
-    public List<Author> convertAuthorDtoList(List<AuthorDto> authors) {
+    public Set<Author> convertAuthorDtoList(List<AuthorDto> authors) {
         return authors.stream()
                 .map(this::convertAuthorDtoToAuthor)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public Author convertAuthorDtoToAuthor(AuthorDto author) {

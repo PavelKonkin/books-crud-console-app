@@ -1,22 +1,29 @@
 package books;
 
 import books.app.BookManagementApp;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
-import java.io.IOException;
 import java.util.Locale;
 
-@Configuration
-@ComponentScan(basePackages = "books")
+@SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = false)
 public class BooksManagement {
-    public static void main(String[] args) throws IOException {
-        ApplicationContext context = new AnnotationConfigApplicationContext(BooksManagement.class);
-        BookManagementApp app = context.getBean(BookManagementApp.class);
-        app.run();
+    public static void main(String[] args) {
+        SpringApplication.run(BooksManagement.class, args);
+    }
+
+    // Метод для запуска консольной логики после старта контекста
+    @Bean
+    public CommandLineRunner runConsoleApp(BookManagementApp app) {
+        return args -> {
+            app.run();  // Вызов логики консольного приложения
+        };
     }
 
     @Bean

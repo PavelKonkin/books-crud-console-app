@@ -6,10 +6,14 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "books")
+@NamedEntityGraph(name = "book.authors.genres", attributeNodes = {
+        @NamedAttributeNode("authors"),
+        @NamedAttributeNode("genres")
+})
 @Getter
 @Setter
 @Builder(toBuilder = true)
@@ -29,7 +33,8 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "author_id")
     )
     @BatchSize(size = 10)
-    private List<Author> authors;
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Set<Author> authors;
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "book_genre",
@@ -37,6 +42,7 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     @BatchSize(size = 10)
-    private List<Genre> genres;
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Set<Genre> genres;
     private String description;
 }

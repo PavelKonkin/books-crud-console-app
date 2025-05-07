@@ -19,5 +19,5 @@ public interface IOService {
 
     void setLocale();
 
-    void showIvalidIdMessage();
+    void showInvalidIdMessage();
 }

@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.springframework.boot' version '3.4.0'
+    id 'io.spring.dependency-management' version '1.1.6'
     id 'checkstyle'
 }
 
@@ -12,51 +13,21 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework:spring-core:6.1.8'//:5.3.21'
-    implementation 'org.springframework:spring-context:6.1.14'//:5.3.21'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.1'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.15.1'
+    implementation 'org.springframework.boot:spring-boot-starter' // базовые зависимости Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc' // для работы с JDBC и PostgreSQL
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // для работы с Hibernate и JPA
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-    implementation 'javax.annotation:javax.annotation-api:1.3.2'
-    implementation 'org.springframework:spring-aop'
-    implementation 'org.aspectj:aspectjweaver:1.9.22.1'
-    runtimeOnly 'org.aspectj:aspectjrt:1.9.22.1'
+    runtimeOnly 'org.postgresql:postgresql:42.2.5'
 
-    // https://mvnrepository.com/artifact/org.springframework/spring-jdbc
-    implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.24'
-    implementation 'org.postgresql:postgresql:42.2.5'
-
-    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core
-    implementation group: 'org.hibernate.orm', name: 'hibernate-core', version: '6.5.2.Final'
-
-    // https://mvnrepository.com/artifact/org.springframework/spring-orm
-    implementation group: 'org.springframework', name: 'spring-orm', version: '6.1.12' //'5.3.21'
-
-    // https://mvnrepository.com/artifact/org.springframework/spring-tx
-    implementation group: 'org.springframework', name: 'spring-tx', version: '6.1.12' //'5.3.21'
-
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    implementation 'ch.qos.logback:logback-classic:1.4.12'
-
-    // https://mvnrepository.com/artifact/org.ehcache/ehcache
     implementation 'org.ehcache:ehcache:3.10.8'
-
-    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-jcache
     implementation 'org.hibernate.orm:hibernate-jcache:6.6.1.Final'
-    
-    implementation 'javax.cache:cache-api:1.1.1' // JCache API
-
-}
-
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'books.BooksManagement'
-        )
-    }
+    implementation 'javax.cache:cache-api:1.1.1'
 }
 
 checkstyle {
