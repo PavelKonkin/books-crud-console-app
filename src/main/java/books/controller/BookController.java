@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,5 +87,13 @@ public class BookController {
         bookService.downloadImage(id, response);
         log.info(messageSource
                 .getMessage("downloadImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin_test")
+    public ResponseEntity<String> adminAccess() {
+        log.info(messageSource
+                .getMessage("adminTestRequestReceived", null, LocaleContextHolder.getLocale()));
+        return ResponseEntity.ok("Admin content.");
     }
 }
