@@ -12,4 +12,14 @@ public class BookDto {
     private String title;
     private String author;
     private String description;
+
+    @Override
+    public String toString() {
+        return "BookDto{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }
