@@ -28,6 +28,8 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-circuitbreaker'
     // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    // https://mvnrepository.com/artifact/org.liquibase/liquibase-core
+    implementation 'org.liquibase:liquibase-core'
 
     implementation project(':common-messages')
     implementation project(':common-consul')

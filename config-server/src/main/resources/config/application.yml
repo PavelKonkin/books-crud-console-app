@@ -3,6 +3,7 @@ logging:
     org.apache.http: warn
     h.i.c: warn
     org.springframework.cloud.consul: warn
+    org.liquibase: debug
 jwt:
   service:
     secret: ${JWT_SERVICE_SECRET:placeholder}

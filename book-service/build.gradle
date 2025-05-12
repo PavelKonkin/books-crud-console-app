@@ -30,6 +30,8 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    // https://mvnrepository.com/artifact/org.liquibase/liquibase-core
+    implementation 'org.liquibase:liquibase-core'
 
 
 

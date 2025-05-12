@@ -1,3 +1,8 @@
+--liquibase formatted sql
+
+--changeset Pavel:initial_schema_import
+--comment: Importing initial schema from schema.sql
+
 
 CREATE TABLE IF NOT EXISTS users
 (
