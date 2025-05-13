@@ -77,7 +77,6 @@ public class JwtServiceImpl implements JwtService {
                     .parseClaimsJws(authToken);
             return true;
         } catch (Exception e) {
-            // Логирование или обработка исключений
             return false;
         }
     }

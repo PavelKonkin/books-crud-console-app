@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public String login(String username, String password) {
-        // Ищем пользователя по имени
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException(messageSource
                         .getMessage("userNotFoundWithUsername", null,

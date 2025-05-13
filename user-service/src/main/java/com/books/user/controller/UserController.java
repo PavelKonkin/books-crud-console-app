@@ -30,13 +30,9 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-        log.info(messageSource
-                .getMessage("registerUserRequestMessage", null,
-                        LocaleContextHolder.getLocale()), signupRequest);
+        log.info("Request to register user {} received", signupRequest);
         userService.registerUser(signupRequest);
-        log.info(messageSource
-                .getMessage("registerUserSuccessMessage", null,
-                        LocaleContextHolder.getLocale()), signupRequest);
+        log.info("User {} has been registered", signupRequest);
         return ResponseEntity.ok(messageSource
                 .getMessage("registerUserSuccessResponseMessage", null,
                         LocaleContextHolder.getLocale()));
@@ -44,13 +40,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        log.info(messageSource
-                .getMessage("loginUserRequestMessage", null,
-                        LocaleContextHolder.getLocale()), loginRequest);
+        log.info("Request to log in user {} received", loginRequest);
         String token = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        log.info(messageSource
-                .getMessage("loginUserSuccessMessage", null,
-                        LocaleContextHolder.getLocale()), loginRequest);
+        log.info("User {} has been logged in", loginRequest);
         return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,
                 "Bearer " + token).body(messageSource
                 .getMessage("loginUserSuccessResponseMessage", null,

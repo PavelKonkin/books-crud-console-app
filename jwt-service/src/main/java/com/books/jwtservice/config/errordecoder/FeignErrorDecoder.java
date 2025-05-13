@@ -21,7 +21,6 @@ public class FeignErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         try {
-            // Попытка десериализовать тело ответа в ApiError
             ApiError apiError = objectMapper.readValue(response.body().asInputStream(), ApiError.class);
 
             if (response.status() == 404) {
@@ -29,8 +28,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
             }
             // Добавить обработку других статусов, если необходимо
         } catch (IOException e) {
-            // Обработка ошибки декодирования
-            return new Exception("Ошибка при декодировании ответа Feign Client");
+            return new Exception("Exception while decoding Feign Client response");
         }
 
         return FeignException.errorStatus(methodKey, response);

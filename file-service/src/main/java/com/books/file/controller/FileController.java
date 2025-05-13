@@ -14,40 +14,32 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/files")
 public class FileController {
     private  final FileService fileService;
-    private  final MessageSource messageSource;
 
-    public FileController(FileService fileService, MessageSource messageSource) {
+    public FileController(FileService fileService) {
         this.fileService = fileService;
-        this.messageSource = messageSource;
     }
 
     @PostMapping("/books/{id}/image")
     public ResponseEntity<String> uploadImage(@PathVariable int id, @RequestParam("file") MultipartFile file) {
-        log.info(messageSource
-                .getMessage("uploadImageBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Request to upload image for book with id = {} has been received", id);
         ResponseEntity<String> response = fileService.uploadImage(id, file);
-        log.info(messageSource
-                .getMessage("uploadImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Image for book with id = {} successfully uploaded", id);
         return response;
 
     }
 
     @GetMapping("/books/{id}/image")
     public void downloadImage(@PathVariable int id, HttpServletResponse response) {
-        log.info(messageSource
-                .getMessage("downloadImageBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Request to download image for book with id = {} has been received", id);
         fileService.downloadImage(id, response);
-        log.info(messageSource
-                .getMessage("downloadImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Image for book with id = {} successfully downloaded", id);
     }
 
     @DeleteMapping("/books/{id}/image")
     public ResponseEntity<String> deleteImage(@PathVariable int id) {
-        log.info(messageSource
-                .getMessage("deleteImageBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Request to delete image for book with id = {} has been received", id);
         ResponseEntity<String> response = fileService.deleteImage(id);
-        log.info(messageSource
-                .getMessage("deleteImageSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Image for book with id = {} successfully deleted", id);
         return response;
     }
 }

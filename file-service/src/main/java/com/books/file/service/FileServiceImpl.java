@@ -100,7 +100,7 @@ public class FileServiceImpl implements FileService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String jwt = null;
         if (authentication != null && authentication.getCredentials() != null) {
-            jwt = (String) authentication.getCredentials();  // Извлекаем токен из контекста
+            jwt = (String) authentication.getCredentials();
         }
         return "Bearer " + jwt;
     }

@@ -13,8 +13,8 @@ public class BooksFeignConfig {
         return requestTemplate -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.getCredentials() != null) {
-                String jwt = (String) authentication.getCredentials();  // Извлекаем токен
-                requestTemplate.header("Authorization", "Bearer " + jwt);  // Передаем токен в заголовке
+                String jwt = (String) authentication.getCredentials();
+                requestTemplate.header("Authorization", "Bearer " + jwt);
             }
         };
     }

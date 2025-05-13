@@ -12,7 +12,6 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     private final UserDetails principal;
     private final String credentials;
 
-    // Конструктор для аутентификации с токеном
     public JwtAuthenticationToken(UserDetails principal, String credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;

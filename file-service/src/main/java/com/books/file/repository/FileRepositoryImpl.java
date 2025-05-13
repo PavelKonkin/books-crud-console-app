@@ -39,7 +39,7 @@ public class FileRepositoryImpl implements FileRepository {
     public FileRepositoryImpl(GridFsTemplate gridFsTemplate, MongoTemplate mongoTemplate,
                            MessageSource messageSource) {
         this.gridFsTemplate = gridFsTemplate;
-        MongoDatabase database = mongoTemplate.getDb(); // Получаем базу данных из MongoTemplate
+        MongoDatabase database = mongoTemplate.getDb();
         this.gridFSBucket = GridFSBuckets.create(database);
         this.messageSource = messageSource;
     }
@@ -78,13 +78,13 @@ public class FileRepositoryImpl implements FileRepository {
         try (GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
              OutputStream os = response.getOutputStream()) {
 
-            byte[] buffer = new byte[8192]; // Используем буфер для чтения файла
+            byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = downloadStream.read(buffer)) != -1) {
                 os.write(buffer, 0, bytesRead); // Записываем данные в ответ
             }
 
-            os.flush(); // Убедимся, что все данные отправлены
+            os.flush();
         } catch (Exception e) {
             throw new InvalidDataAccessApiUsageException(messageSource
                     .getMessage("errorDownloadingFile", null, LocaleContextHolder.getLocale()), e);

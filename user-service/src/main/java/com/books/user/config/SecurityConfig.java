@@ -21,21 +21,20 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
     @Value("${jwt.service.secret}")
-    private String jwtServiceSecret;  // Секретный ключ для валидации запроса от JWT сервиса
+    private String jwtServiceSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(withDefaults())  // Включаем CORS с настройками по умолчанию
-                .csrf(AbstractHttpConfigurer::disable)  // Отключаем CSRF
+                .cors(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Доступ ко всем эндпоинтам регистрации и логина
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Сессии без состояния (для JWT)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtServiceAuthFilter(), UsernamePasswordAuthenticationFilter.class);  // Добавляем фильтр
+                .addFilterBefore(jwtServiceAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -47,7 +46,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtServiceAuthFilter jwtServiceAuthFilter() {
-        return new JwtServiceAuthFilter(jwtServiceSecret);  // Фильтр для проверки заголовка
+        return new JwtServiceAuthFilter(jwtServiceSecret);
     }
 
 }

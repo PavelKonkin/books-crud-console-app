@@ -32,7 +32,7 @@ public class ConsulTokenEnvironmentPostProcessor implements EnvironmentPostProce
             );
         } catch (IOException e) {
             // Если токен не найден залогировать предупреждение
-            log.info("Не удалось прочитать токен из /consul/data/service_token.txt: " + e.getMessage());
+            log.info("Consul token was unable to read from " + pathToFile + e.getMessage());
         }
     }
 
