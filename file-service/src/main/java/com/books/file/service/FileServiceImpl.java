@@ -3,8 +3,6 @@ package com.books.file.service;
 import com.books.dto.BookDto;
 import com.books.file.client.BooksFeignClient;
 import com.books.file.repository.FileRepository;
-import com.books.utils.helper.RetryHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -25,36 +23,35 @@ public class FileServiceImpl implements FileService {
     private final BooksFeignClient booksFeignClient;
     private final FileRepository fileRepository;
     private final MessageSource messageSource;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private static final String TOPIC_NEW_FILE = "new-file";
     private static final String TOPIC_DELETE_FILE = "delete-file";
     private static final String TOPIC_DELETE_OLD_FILE = "delete-old-file";
-    private final ObjectMapper objectMapper;
 
 
 
 
     @Autowired
     public FileServiceImpl(FileRepository fileRepository,
-                           BooksFeignClient booksFeignClient, MessageSource messageSource, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+                           BooksFeignClient booksFeignClient, MessageSource messageSource,
+                           KafkaTemplate<String, Object> kafkaTemplate) {
         this.booksFeignClient = booksFeignClient;
         this.fileRepository = fileRepository;
         this.messageSource = messageSource;
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
     }
 
     @Override
     public ResponseEntity<String> uploadImage(int id, MultipartFile file) {
         try {
-            BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
+            BookDto book = booksFeignClient.getBook(getJwtToken(), id);
             String oldImageId = book.getImageId();
             String imageId = fileRepository.storeFile(file);
             book.setImageId(imageId);
             if (oldImageId != null) {
                 kafkaTemplate.send(TOPIC_DELETE_OLD_FILE, oldImageId);
             }
-            kafkaTemplate.send(TOPIC_NEW_FILE, objectMapper.writeValueAsString(book));
+            kafkaTemplate.send(TOPIC_NEW_FILE, book);
             return ResponseEntity.ok(messageSource
                     .getMessage("imageUploadSuccess", null, LocaleContextHolder.getLocale()));
         } catch (IOException e) {
@@ -66,7 +63,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void downloadImage(int id, HttpServletResponse response) {
-        BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
+        BookDto book = booksFeignClient.getBook(getJwtToken(), id);
         try {
             fileRepository.downloadFile(book.getImageId(), response);
         } catch (Exception e) {
@@ -82,18 +79,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public ResponseEntity<String> deleteImage(int id) {
-        try {
-            BookDto book = RetryHelper.executeWithRetry(() -> booksFeignClient.getBook(getJwtToken(), id));
-            String imageId = book.getImageId();
-            delete(imageId);
-            book.setImageId(null);
-            kafkaTemplate.send(TOPIC_DELETE_FILE, objectMapper.writeValueAsString(book));
-            return ResponseEntity.ok(messageSource
-                    .getMessage("deleteImageSuccess", null, LocaleContextHolder.getLocale()));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(messageSource
-                    .getMessage("deleteImageError", null, LocaleContextHolder.getLocale()));
-        }
+        BookDto book = booksFeignClient.getBook(getJwtToken(), id);
+        String imageId = book.getImageId();
+        delete(imageId);
+        book.setImageId(null);
+        kafkaTemplate.send(TOPIC_DELETE_FILE, book);
+        return ResponseEntity.ok(messageSource
+                .getMessage("deleteImageSuccess", null, LocaleContextHolder.getLocale()));
     }
 
     private String getJwtToken() {
