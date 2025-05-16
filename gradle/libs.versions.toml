@@ -1,0 +1,84 @@
+[versions]
+checkstyleTool = "10.3"
+springCloud = "2024.0.0"
+springDependencyManagement = "1.1.6"
+springBoot = "3.4.0"
+springKafka = "3.3.0"
+springContext = "6.2.0"
+springTx = "6.2.0"
+springSecurityCrypto = "6.4.4"
+
+postgresql = "42.7.2"
+lombok = "1.18.28"
+jakartaValidationApi = "3.0.2"
+jsonWebToken = "0.11.5"
+
+ehcache = "3.10.8"
+hibernateJcache = "6.6.1.Final"
+cacheApi = "1.1.1"
+
+liquibase = "4.29.2"
+resilience4j = "2.2.0"
+micrometerPrometheus = "1.14.1"
+
+mockito = "5.14.2"
+
+[libraries]
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "springCloud" }
+
+#https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "springKafka" }
+
+spring-context = { module = "org.springframework:spring-context", version.ref = "springContext" }
+spring-tx = { module = "org.springframework:spring-tx", version.ref = "springTx" }
+spring-security-crypto = { module = "org.springframework.security:spring-security-crypto", version.ref = "springSecurityCrypto" }
+
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+ehcache3 = { module = "org.ehcache:ehcache", version.ref = "ehcache" }
+hibernate-jcache = { module = "org.hibernate.orm:hibernate-jcache", version.ref = "hibernateJcache" }
+cache-api = { module = "javax.cache:cache-api", version.ref = "cacheApi" }
+jakarta-validation-api = {  module = "jakarta.validation:jakarta.validation-api", version.ref = "jakartaValidationApi" }
+jwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jsonWebToken" }
+jwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jsonWebToken" }
+jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jsonWebToken" }
+
+#https://mvnrepository.com/artifact/org.liquibase/liquibase-core
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+
+resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
+
+#https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometerPrometheus" }
+
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+testcontainers-core = { module = "org.testcontainers:testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
+testcontainers-mongodb = { module = "org.testcontainers:mongodb" }
+testcontainers-kafka = { module = "org.testcontainers:kafka" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+hamcrest = { module = "org.hamcrest:hamcrest" }
+
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-boot-starter-data-mongodb = { module = "org.springframework.boot:spring-boot-starter-data-mongodb" }
+
+spring-cloud-starter-config = { module = "org.springframework.cloud:spring-cloud-starter-config" }
+spring-cloud-starter-consul-discovery = { module = "org.springframework.cloud:spring-cloud-starter-consul-discovery" }
+spring-cloud-starter-openfeign = { module = "org.springframework.cloud:spring-cloud-starter-openfeign" }
+spring-cloud-starter-circuitbreaker-resilience4j = { module = "org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j" }
+spring-cloud-config-server = { module = "org.springframework.cloud:spring-cloud-config-server" }
+spring-cloud-starter-gateway = { module = "org.springframework.cloud:spring-cloud-starter-gateway" }
+
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
