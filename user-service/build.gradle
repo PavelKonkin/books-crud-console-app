@@ -1,8 +1,7 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.0'
-    id 'io.spring.dependency-management' version '1.1.6'
-    id 'checkstyle'
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = 'com.books.user'
@@ -13,21 +12,23 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter' // базовые зависимости Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc' // для работы с JDBC и PostgreSQL
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // для работы с Hibernate и JPA
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
-    implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
-    implementation 'io.github.resilience4j:resilience4j-circuitbreaker'
-    // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
-    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation libs.spring.boot.starter
+    implementation libs.spring.boot.starter.jdbc
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.cache
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.actuator
+
+    implementation libs.spring.cloud.starter.config
+    implementation libs.spring.cloud.starter.consul.discovery
+    implementation libs.spring.cloud.starter.openfeign
+    implementation libs.spring.cloud.starter.circuitbreaker.resilience4j
+
+    implementation libs.resilience4j.circuitbreaker
+    implementation libs.micrometer.registry.prometheus
+    implementation libs.liquibase.core
 
     implementation project(':common-messages')
     implementation project(':common-consul')
@@ -35,24 +36,19 @@ dependencies {
     implementation project(':common-dto')
     implementation project(':common-utils')
 
-    runtimeOnly 'org.postgresql:postgresql:42.2.5'
+    runtimeOnly libs.postgresql
 
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
 
-    implementation 'org.ehcache:ehcache:3.10.8'
-    implementation 'org.hibernate.orm:hibernate-jcache:6.6.1.Final'
-    implementation 'javax.cache:cache-api:1.1.1'
+    implementation libs.ehcache3
+    implementation libs.hibernate.jcache
+    implementation libs.cache.api
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.0" // Версия Spring Cloud
+        mavenBom libs.spring.cloud.dependencies.get().toString()
     }
-}
-
-checkstyle {
-    toolVersion = '10.3'  // Версия Checkstyle
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 

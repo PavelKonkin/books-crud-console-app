@@ -24,7 +24,11 @@ spring:
     url: jdbc:postgresql://${BOOKS_DB_CONTAINER_NAME:localhost}:6542/${POSTGRE_BOOKS_DB_NAME}
     username: ${POSTGRE_BOOKS_USER}
     password: ${POSTGRE_BOOKS_PASS}
-
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+    default-schema: public
+    liquibase-schema: public
   sql.init:
-    mode: always
+    mode: never
     schema-locations: classpath:schema.sql

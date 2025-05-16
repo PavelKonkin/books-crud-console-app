@@ -1,7 +1,7 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.0'
-    id 'io.spring.dependency-management' version '1.1.6'
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = 'com.books.gateway'
@@ -12,29 +12,23 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter' // базовые зависимости Spring Boot
+    implementation libs.spring.boot.starter
+    implementation libs.spring.boot.starter.actuator
+
 // Spring Boot Web для поднятия REST API сервера конфигураций
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
-    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-    implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    // https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus
-    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation libs.spring.cloud.starter.config
+    implementation libs.spring.cloud.starter.gateway
+    implementation libs.spring.cloud.starter.consul.discovery
+
+    implementation libs.micrometer.registry.prometheus
 
     implementation project(':common-messages')
     implementation project(':common-consul')
-
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.0" // Версия Spring Cloud
+        mavenBom libs.spring.cloud.dependencies.get().toString()
     }
 }
 
-test {
-    useJUnitPlatform()  // Если вы используете JUnit 5
-}

@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation libs.jakarta.validation.api
 
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
 }

@@ -10,8 +10,17 @@ repositories {
 }
 
 checkstyle {
-    toolVersion = '10.3'  // Версия Checkstyle
+    toolVersion = libs.versions.checkstyleTool.get()
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+
+subprojects {
+    apply plugin: 'checkstyle'
+
+    checkstyle {
+        toolVersion = libs.versions.checkstyleTool.get()
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    }
 }
 
 task startContainersForDebugAndDevelopment(type: Exec) {
@@ -23,7 +32,7 @@ task startContainersForDebugAndDevelopment(type: Exec) {
 
 task stopContainers(type: Exec) {
     group = 'application'
-    workingDir '.'  // Путь к файлу docker-compose.yml
+    workingDir '.'
     commandLine 'docker', 'compose', 'down'
 }
 
@@ -37,7 +46,7 @@ task restartContainersForDebugAndDevelopment(dependsOn: ['stopContainers',
 
 task startProdContainers(type: Exec) {
     group = 'application'
-    workingDir '.' // Путь к файлу docker-compose.yml
+    workingDir '.'
     commandLine 'docker', 'compose', 'up', '-d'
 }
 

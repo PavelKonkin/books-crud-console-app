@@ -24,7 +24,7 @@ public class RetryHelper {
             } catch (Exception ex) {
                 lastException = ex;
 
-                logger.info("Попытка " + attempt + " завершилась ошибкой: " + ex.getMessage());
+                logger.info("Attempt " + attempt + " was resulted with exception: " + ex.getMessage());
 
                 if (attempt < MAX_RETRIES) {
                     try {
@@ -36,6 +36,7 @@ public class RetryHelper {
             }
         }
 
-        throw new RetryOperationException("Не удалось выполнить запрос после " + MAX_RETRIES + " попыток.", lastException);
+        throw new RetryOperationException("Request was unable to success after " + MAX_RETRIES + " attempts.",
+                lastException);
     }
 }

@@ -15,7 +15,11 @@ spring:
     url: jdbc:postgresql://${USERS_DB_CONTAINER_NAME:localhost}:6543/${POSTGRE_USERS_DB_NAME}
     username: ${POSTGRE_USERS_USER}
     password: ${POSTGRE_USERS_PASS}
-
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+    default-schema: public
+    liquibase-schema: public
   sql.init:
-    mode: always
+    mode: never
     schema-locations: classpath:schema.sql

@@ -2,7 +2,6 @@ package com.books.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.authenticator.BasicAuthenticator;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -37,8 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(BindException ex) {
-        log.info(messageSource
-                .getMessage("validationException", null, LocaleContextHolder.getLocale()), ex.getMessage());
+        log.info("Validation exception {}", ex.getMessage());
         BindingResult bindingResult = ex.getBindingResult();
         List<FieldError> fieldErrors = bindingResult.getFieldErrors();
         String message = fieldErrors.stream()
@@ -65,8 +63,7 @@ public class GlobalExceptionHandler {
             ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(Throwable ex) {
-        log.info(messageSource
-                .getMessage("validationException", null, LocaleContextHolder.getLocale()), ex.getMessage());
+        log.info("Validation exception {}", ex.getMessage());
         List<String> errors = getStackTrace(ex);
         return new ApiError(errors,
                 ex.getMessage(),
@@ -79,9 +76,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConstraintViolationException(DataIntegrityViolationException ex) {
-        log.info(messageSource
-                .getMessage("dataIntegrityException", null, LocaleContextHolder.getLocale()),
-                ex.getMessage());
+        log.info("Data integrity violation exception {}", ex.getMessage());
         List<String> errors = getStackTrace(ex);
         return new ApiError(errors,
                 ex.getMessage(),
@@ -94,9 +89,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleNumberFormatException(MethodArgumentTypeMismatchException ex) {
-        log.info(messageSource
-                .getMessage("methodArgumentTypeMismatchException", null, LocaleContextHolder.getLocale()),
-                ex.getMessage());
+        log.info("Method argument type mismatch exception {}", ex.getMessage());
         List<String> errors = getStackTrace(ex);
         return new ApiError(errors,
                 ex.getMessage(),
@@ -123,8 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(NotFoundException ex) {
-        log.info(messageSource
-                .getMessage("notFoundException", null, LocaleContextHolder.getLocale()) + ex.getMessage());
+        log.info("Object not found " + ex.getMessage());
         List<String> errors = getStackTrace(ex);
         return new ApiError(errors,
                 ex.getMessage(),

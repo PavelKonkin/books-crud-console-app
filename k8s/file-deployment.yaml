@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: file-service
-          image: dmfan/file-service:v.1.0.1
+          image: dmfan/file-service:v.1.0.2
           ports:
             - containerPort: 8083
           resources:

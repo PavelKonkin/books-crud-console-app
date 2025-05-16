@@ -24,7 +24,7 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtFeignClient jwtFeignClient;  // Feign клиент для общения с jwt сервисом
+    private final JwtFeignClient jwtFeignClient;
 
     @Autowired
     public JwtAuthenticationFilter(JwtFeignClient jwtFeignClient) {
@@ -35,12 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String jwt = parseJwt(request);  // Получаем токен из заголовка
+            String jwt = parseJwt(request);
             if (jwt != null) {
                 JwtValidationResponse validationResponse = RetryHelper
                         .executeWithRetry(() -> jwtFeignClient.validateJwtToken(new TokenRequest(jwt)));  // Отправляем токен на проверку
 
-                if (validationResponse.isValid()) {  // Проверка валидности
+                if (validationResponse.isValid()) {
                     UserDetails userDetails = new User(
                             validationResponse.getUsername(),
                             "",
@@ -56,10 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            log.error("Не удалось аутентифицировать пользователя: {}", e.getMessage());
+            log.error("User was not authenticated : {}", e.getMessage());
         }
 
-        filterChain.doFilter(request, response);  // Передаем управление следующему фильтру
+        filterChain.doFilter(request, response);
     }
 
 

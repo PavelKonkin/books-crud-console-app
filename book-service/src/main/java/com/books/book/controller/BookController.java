@@ -4,8 +4,6 @@ import com.books.dto.BookDto;
 import com.books.book.service.BookService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,68 +18,54 @@ import java.util.List;
 @RequestMapping("/api/v1/books")
 public class BookController {
     private final BookService bookService;
-    private  final MessageSource messageSource;
 
-    public BookController(BookService bookService, MessageSource messageSource) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
-        this.messageSource = messageSource;
     }
 
     @GetMapping
     public List<BookDto> getAllBooks() {
-        log.info(messageSource
-                .getMessage("getAllBooksBeforeMessage", null, LocaleContextHolder.getLocale()));
+        log.info("Request for list of all stored books has been received");
         List<BookDto> books = bookService.getAllBooks();
-        log.info(messageSource
-                .getMessage("getAllBooksSuccessMessage", null, LocaleContextHolder.getLocale()), books);
+        log.info("List of all stored books has been received {}", books);
         return books;
     }
 
     @GetMapping("/{id}")
     public BookDto getBook(@PathVariable int id) {
-        log.info(messageSource
-                .getMessage("getBookBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Request book with id = {} has been received", id);
         BookDto book = bookService.getBook(id);
-        log.info(messageSource
-                .getMessage("getBookSuccessMessage", null, LocaleContextHolder.getLocale()), book);
+        log.info("Book was found {}", book);
         return book;
     }
 
     @DeleteMapping("/{id}")
     public void deleteBook(@PathVariable int id) {
-        log.info(messageSource
-                .getMessage("deleteBookBeforeMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Request for deleting book with id = {} has been received", id);
         bookService.delete(id);
-        log.info(messageSource
-                .getMessage("deleteBookSuccessMessage", null, LocaleContextHolder.getLocale()), id);
+        log.info("Deleted book with id = {}", id);
     }
 
     @PutMapping
     public void updateBook(@Valid @RequestBody BookDto bookDto) {
-        log.info(messageSource
-                .getMessage("updateBookBeforeMessage", null, LocaleContextHolder.getLocale()), bookDto);
+        log.info("Request for updating book {} has been received", bookDto);
         bookService.update(bookDto);
-        log.info(messageSource
-                .getMessage("updateBookSuccessMessage", null, LocaleContextHolder.getLocale()));
+        log.info("Book was updated");
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookDto createBook(@Valid @RequestBody BookDto bookDto) {
-        log.info("Получен запрос на создание книги с о свойствами {}", bookDto);
-        log.info(messageSource
-                .getMessage("createBookBeforeMessage", null, LocaleContextHolder.getLocale()), bookDto);
+        log.info("Request for creating book {} has been received", bookDto);
         BookDto savedBook = bookService.create(bookDto);
-        log.info(messageSource
-                .getMessage("createBookSuccessMessage", null, LocaleContextHolder.getLocale()), savedBook);
+        log.info("Book {} was created", savedBook);
         return savedBook;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin_test")
     public ResponseEntity<String> adminAccess() {
-        log.info(messageSource
-                .getMessage("adminTestRequestReceived", null, LocaleContextHolder.getLocale()));
+        log.info("Request to admin only endpoint has been received");
         return ResponseEntity.ok("Admin content.");
     }
 }
